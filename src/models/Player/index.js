@@ -1,53 +1,26 @@
-const PATH_TO_ASSETS = './assets/'
+import Animation from "../Animation/index.js";
+import AnimationManager from "../AnimationManager/index.js";
 
-export class Player{
+export default class Player{
 
   constructor(width, height){
-    this.animations = {
-      IDLE: {
-        spritesheetPath: PATH_TO_ASSETS + "Sheets/ninjaFrog/Idle.png",
-        totalFrames: 11,
-        animationSpeed: 100,
-        frameWidth: 32,
-        frameHeight: 32,
-        loop: true
-      },
-      RUN: {
-        spritesheetPath: PATH_TO_ASSETS + "Sheets/ninjaFrog/Run.png",
-        totalFrames: 12,
-        animationSpeed: 50,
-        frameWidth: 32,
-        frameHeight: 32,
-        loop: true
-      },
-      JUMP: {
-        spritesheetPath: PATH_TO_ASSETS + "Sheets/ninjaFrog/Jump.png",
-        totalFrames: 1,
-        animationSpeed: 100,
-        frameWidth: 32,
-        frameHeight: 32,
-        loop: false
-      },
-      FALL: {
-        spritesheetPath: PATH_TO_ASSETS + "Sheets/ninjaFrog/Fall.png",
-        totalFrames: 1,
-        animationSpeed: 100,
-        frameWidth: 32,
-        frameHeight: 32,
-        loop: false
-      },
-    };
 
+    const animations = {
+      IDLE: new Animation("Sheets/ninjaFrog/Idle.png", 11, 100, 32, 32, true),
+      RUN: new Animation("Sheets/ninjaFrog/Run.png", 12, 50, 32, 32, true),
+      JUMP: new Animation("Sheets/ninjaFrog/Jump.png", 1, 100, 32, 32, false),
+      FALL: new Animation("Sheets/ninjaFrog/Fall.png", 1, 100, 32, 32, false,)
+    }
+
+    this.animationManager = new AnimationManager(animations)
     this.flipX = false;
-    this.currentAnimation = this.animations.IDLE;
-    this.currentFrame = 0;
-    this.lastUpdate = Date.now();
+    this.pads = Pads.get();
 
     this.width = width;
     this.height = height;
 
     this.x = 0;
-    this.y = this.height - this.currentAnimation.frameHeight;
+    this.y = this.height - this.animationManager.getCurrentAnimation().frameHeight;
     this.velocityX = 0;
     this.velocityY = 0;
     this.isJumping = false;
@@ -58,20 +31,12 @@ export class Player{
   }
 
   updateAnimation(){
-    const now = Date.now();
-    if (now - this.lastUpdate > this.currentAnimation.animationSpeed) {
-      this.currentFrame = (this.currentFrame + 1) % this.currentAnimation.totalFrames;
-      this.lastUpdate = now;
-
-      if (!this.currentAnimation.loop && this.currentFrame === this.currentAnimation.totalFrames - 1) {
-        this.currentFrame = 0;
-      }
-    }
+    this.animationManager.updateAnimation()
 
     if (this.velocityY < 0) {
-      this.setAnimation('JUMP');
+      this.animationManager.setAnimation('JUMP');
     } else if (this.velocityY > 0) {
-      this.setAnimation('FALL');
+      this.animationManager.setAnimation('FALL');
     }
   }
 
@@ -79,8 +44,8 @@ export class Player{
     this.velocityY += this.gravity;
     this.y += this.velocityY;
 
-    if (this.y >= this.height - this.currentAnimation.frameHeight) {
-      this.y = this.height - this.currentAnimation.frameHeight;
+    if (this.y >= this.height - this.animationManager.getCurrentAnimation().frameHeight) {
+      this.y = this.height - this.animationManager.getCurrentAnimation().frameHeight;
       this.velocityY = 0;
       this.isJumping = false;
     }
@@ -89,26 +54,41 @@ export class Player{
   }
 
   draw(){
-    const {frameWidth, frameHeight, spritesheetPath} = this.currentAnimation;
-    const frameX = this.currentFrame *frameWidth;
-    const frameImage = new Image(spritesheetPath);
+    const {frameWidth, frameHeight, image} = this.animationManager.getCurrentAnimation();
+    const frameX = this.animationManager.getCurrentFrame() *frameWidth;
 
-    frameImage.startx = frameX;
-    frameImage.starty = 0;
-    frameImage.endx = frameX +frameWidth;
-    frameImage.endy =frameHeight;
-    frameImage.width = this.flipX ? -Math.abs(frameWidth) : Math.abs(frameWidth);;
-    frameImage.height =frameHeight;
+    image.startx = frameX;
+    image.starty = 0;
+    image.endx = frameX +frameWidth;
+    image.endy =frameHeight;
+    image.width = this.flipX ? -Math.abs(frameWidth) : Math.abs(frameWidth);;
+    image.height =frameHeight;
 
     if (this.flipX) {
-      frameImage.width = -Math.abs(frameWidth);
-      frameImage.draw(this.x + frameWidth, this.y);
+      image.width = -Math.abs(frameWidth);
+      image.draw(this.x + frameWidth, this.y);
       return;
     }
 
-    frameImage.width = Math.abs(frameWidth);
-    frameImage.draw(this.x, this.y);
+    image.width = Math.abs(frameWidth);
+    image.draw(this.x, this.y);
     return;
+  }
+
+  move(){
+    this.pads.update();
+
+    if (this.pads.pressed(Pads.RIGHT)) {
+      this.moveRight();
+    } else if (this.pads.pressed(Pads.LEFT)) {
+      this.moveLeft();
+    } else {
+      this.animationManager.setAnimation('IDLE');
+    }
+  
+    if (this.pads.pressed(Pads.UP)) {
+      this.jump();
+    }
   }
 
   moveRight() {
@@ -116,11 +96,11 @@ export class Player{
     this.x += this.velocityX;
     this.flipX = false;
 
-    if (this.x + this.currentAnimation.frameWidth > this.width) {
-      this.x = this.width - this.currentAnimation.frameWidth;
+    if (this.x + this.animationManager.getCurrentAnimation().frameWidth > this.width) {
+      this.x = this.width - this.animationManager.getCurrentAnimation().frameWidth;
     }
 
-    this.setAnimation('RUN');
+    this.animationManager.setAnimation('RUN');
   }
 
   moveLeft() {
@@ -132,7 +112,7 @@ export class Player{
       this.x = 0;
     }
 
-    this.setAnimation('RUN');
+    this.animationManager.setAnimation('RUN');
   }
 
   jump() {
@@ -140,15 +120,7 @@ export class Player{
       this.velocityY = this.jumpStrength;
       this.isJumping = true;
 
-      this.setAnimation('JUMP');
+      this.animationManager.setAnimation('JUMP');
     }
   }
-
-  setAnimation(name) {
-    if (this.animations[name] && this.currentAnimation !== this.animations[name]) {
-      this.currentAnimation = this.animations[name];
-      this.currentFrame = 0;
-    }
-  }
-
 }
