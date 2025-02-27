@@ -4,7 +4,7 @@ import Player from "./models/Player/index.js";
 const { width, height } = Screen.getMode();
 
 const player = new Player(width, height);
-const apple = new Fruit("Apple", width, height, width / 2, height / 2);
+const apple = new Fruit("Apple", width / 2, height / 2);
 
 Screen.display(() => {
   player.handleInput();
