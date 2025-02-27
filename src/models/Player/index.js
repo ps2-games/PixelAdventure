@@ -1,126 +1,141 @@
 import Animation from "../Animation/index.js";
 import AnimationManager from "../AnimationManager/index.js";
+import { MovementController } from "../Movement/index.js";
+import { PlayerMovementConstants } from "./constants/movement.js";
+import { PlayerAnimationsStates } from "./state/animations.js";
 
-export default class Player{
-
-  constructor(width, height){
-
+export default class Player {
+  /**
+   * @param {number} canvasWidth - Largura do canvas do jogo
+   * @param {number} canvasHeight - Altura do canvas do jogo
+   * @param {object} options - Opções de configuração do jogador
+   */
+  constructor(canvasWidth, canvasHeight, options = {}) {
+    this.initializeAnimations();
+    
+    this.inputController = Pads.get();
+    
+    const spriteHeight = this.animationManager.getCurrentAnimation().frameHeight;
+    const groundLevel = canvasHeight - spriteHeight;
+    
+    this.movement = new MovementController({
+      initialX: 0,
+      initialY: groundLevel,
+      gravity: options.gravity || PlayerMovementConstants.DEFAULT_GRAVITY,
+      jumpStrength: options.jumpStrength || PlayerMovementConstants.DEFAULT_JUMP_STRENGTH,
+      speed: options.speed || PlayerMovementConstants.DEFAULT_SPEED,
+      minX: 0,
+      maxX: canvasWidth - this.animationManager.getCurrentAnimation().frameWidth,
+      maxY: groundLevel,
+      onJump: () => {
+        this.animationManager.setAnimation(PlayerAnimationsStates.JUMP);
+      },
+      onLand: () => {
+        if (this.movement.getVelocity().x !== 0) {
+          this.animationManager.setAnimation(PlayerAnimationsStates.RUN);
+        } else {
+          this.animationManager.setAnimation(PlayerAnimationsStates.IDLE);
+        }
+      },
+      onDirectionChange: (direction) => {
+        this.flipX = direction === PlayerMovementConstants.DIRECTION.LEFT;
+      }
+    });
+  }
+  /**
+   * Inicializa todas as animações do jogador
+   */
+  initializeAnimations() {
     const animations = {
-      IDLE: new Animation("Sheets/ninjaFrog/Idle.png", 11, 100, 32, 32, true),
-      RUN: new Animation("Sheets/ninjaFrog/Run.png", 12, 50, 32, 32, true),
-      JUMP: new Animation("Sheets/ninjaFrog/Jump.png", 1, 100, 32, 32, false),
-      FALL: new Animation("Sheets/ninjaFrog/Fall.png", 1, 100, 32, 32, false,)
-    }
-
-    this.animationManager = new AnimationManager(animations)
+      [PlayerAnimationsStates.IDLE]: new Animation("Sheets/ninjaFrog/Idle.png", 11, 100, 32, 32, true),
+      [PlayerAnimationsStates.RUN]: new Animation("Sheets/ninjaFrog/Run.png", 12, 50, 32, 32, true),
+      [PlayerAnimationsStates.JUMP]: new Animation("Sheets/ninjaFrog/Jump.png", 1, 100, 32, 32, false),
+      [PlayerAnimationsStates.FALL]: new Animation("Sheets/ninjaFrog/Fall.png", 1, 100, 32, 32, false)
+    };
+    
+    this.animationManager = new AnimationManager(animations);
     this.flipX = false;
-    this.pads = Pads.get();
-
-    this.width = width;
-    this.height = height;
-
-    this.x = 0;
-    this.y = this.height - this.animationManager.getCurrentAnimation().frameHeight;
-    this.velocityX = 0;
-    this.velocityY = 0;
-    this.isJumping = false;
-
-    this.gravity = 0.5;
-    this.jumpStrength = -8;
-    this.horizontalVelocity = 3;
   }
-
-  updateAnimation(){
-    this.animationManager.updateAnimation()
-
-    if (this.velocityY < 0) {
-      this.animationManager.setAnimation('JUMP');
-    } else if (this.velocityY > 0) {
-      this.animationManager.setAnimation('FALL');
-    }
-  }
-
-  update(){
-    this.velocityY += this.gravity;
-    this.y += this.velocityY;
-
-    if (this.y >= this.height - this.animationManager.getCurrentAnimation().frameHeight) {
-      this.y = this.height - this.animationManager.getCurrentAnimation().frameHeight;
-      this.velocityY = 0;
-      this.isJumping = false;
-    }
-
-    this.updateAnimation();
-  }
-
-  draw(){
-    const {frameWidth, frameHeight, image} = this.animationManager.getCurrentAnimation();
-    const frameX = this.animationManager.getCurrentFrame() *frameWidth;
-
-    image.startx = frameX;
-    image.starty = 0;
-    image.endx = frameX +frameWidth;
-    image.endy =frameHeight;
-    image.width = this.flipX ? -Math.abs(frameWidth) : Math.abs(frameWidth);;
-    image.height =frameHeight;
-
-    if (this.flipX) {
-      image.width = -Math.abs(frameWidth);
-      image.draw(this.x + frameWidth, this.y);
-      return;
-    }
-
-    image.width = Math.abs(frameWidth);
-    image.draw(this.x, this.y);
-    return;
-  }
-
-  move(){
-    this.pads.update();
-
-    if (this.pads.pressed(Pads.RIGHT)) {
-      this.moveRight();
-    } else if (this.pads.pressed(Pads.LEFT)) {
-      this.moveLeft();
-    } else {
-      this.animationManager.setAnimation('IDLE');
+  /**
+   * Atualiza o estado da animação baseado no estado do jogador
+   */
+  updateAnimation() {
+    this.animationManager.updateAnimation();
+    
+    const velocity = this.movement.getVelocity();
+    const currentState = this.animationManager.getCurrentAnimation();
+  
+    let newState = PlayerAnimationsStates.IDLE;
+  
+    if (velocity.y < 0) {
+      newState = PlayerAnimationsStates.JUMP;
+    } else if (velocity.y > 0) {
+      newState = PlayerAnimationsStates.FALL;
+    } else if (velocity.x !== 0) {
+      newState = PlayerAnimationsStates.RUN;
     }
   
-    if (this.pads.pressed(Pads.UP)) {
-      this.jump();
+    if (currentState !== newState) {
+      this.animationManager.setAnimation(newState);
     }
   }
-
-  moveRight() {
-    this.velocityX = this.horizontalVelocity;
-    this.x += this.velocityX;
-    this.flipX = false;
-
-    if (this.x + this.animationManager.getCurrentAnimation().frameWidth > this.width) {
-      this.x = this.width - this.animationManager.getCurrentAnimation().frameWidth;
+  /**
+   * Processa os inputs do jogador
+   */
+  handleInput() {
+    this.inputController.update();
+    
+    let moving = false;
+  
+    if (this.inputController.pressed(Pads.RIGHT)) {
+      this.movement.moveRight();
+      moving = true;
+    } else if (this.inputController.pressed(Pads.LEFT)) {
+      this.movement.moveLeft();
+      moving = true;
     }
-
-    this.animationManager.setAnimation('RUN');
-  }
-
-  moveLeft() {
-    this.velocityX = -this.horizontalVelocity;
-    this.x += this.velocityX;
-    this.flipX = true;
-
-    if (this.x < 0) {
-      this.x = 0;
+  
+    if (!moving) {
+      this.movement.stopHorizontalMovement();
     }
-
-    this.animationManager.setAnimation('RUN');
+  
+    if (this.inputController.pressed(Pads.UP)) {
+      this.movement.jump();
+    }
   }
-
-  jump() {
-    if (!this.isJumping) {
-      this.velocityY = this.jumpStrength;
-      this.isJumping = true;
-
-      this.animationManager.setAnimation('JUMP');
+  /**
+   * Atualiza o jogador
+   */
+  update() {
+    this.handleInput();
+    
+    this.movement.update();
+    
+    this.updateAnimation();
+  }
+  /**
+   * Renderiza o jogador na tela
+   */
+  draw() {
+    const currentAnimation = this.animationManager.getCurrentAnimation();
+    const frameWidth = currentAnimation.frameWidth;
+    const frameHeight = currentAnimation.frameHeight;
+    const currentFrame = this.animationManager.getCurrentFrame();
+    const image = currentAnimation.image;
+    const position = this.movement.getPosition();
+    
+    image.startx = currentFrame * frameWidth;
+    image.starty = 0;
+    image.endx = image.startx + frameWidth;
+    image.endy = frameHeight;
+    
+    image.width = this.flipX ? -Math.abs(frameWidth) : Math.abs(frameWidth);
+    image.height = frameHeight;
+    
+    if (this.flipX) {
+      image.draw(position.x + frameWidth, position.y);
+    } else {
+      image.draw(position.x, position.y);
     }
   }
 }

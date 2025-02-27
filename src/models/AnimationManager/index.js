@@ -32,7 +32,6 @@ export default class AnimationManager {
      */
     this.lastUpdate = Date.now();
 
-    // Define a primeira animação como padrão, se houver
     const firstAnimationKey = Object.keys(animations)[0];
     if (firstAnimationKey) {
       this.setAnimation(firstAnimationKey);
@@ -46,7 +45,7 @@ export default class AnimationManager {
   setAnimation(name) {
     if (this.animations[name] && this.currentAnimation !== this.animations[name]) {
       this.currentAnimation = this.animations[name];
-      this.currentFrame = 0; // Reinicia o frame ao mudar de animação
+      this.currentFrame = 0;
     }
   }
 
@@ -62,7 +61,6 @@ export default class AnimationManager {
       this.currentFrame = (this.currentFrame + 1) % this.currentAnimation.totalFrames;
       this.lastUpdate = now;
 
-      // Se a animação não for loop e chegar ao último frame, volta ao primeiro frame
       if (!this.currentAnimation.loop && this.currentFrame === this.currentAnimation.totalFrames - 1) {
         this.currentFrame = 0;
       }

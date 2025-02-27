@@ -6,9 +6,8 @@ const { width, height } = Screen.getMode();
 const player = new Player(width, height);
 const apple = new Fruit("Apple", width, height, width / 2, height / 2);
 
-
 Screen.display(() => {
-  player.move();
+  player.handleInput();
 
   apple.updateAnimation();
   apple.draw();
