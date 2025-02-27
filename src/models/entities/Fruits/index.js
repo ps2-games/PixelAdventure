@@ -1,15 +1,13 @@
-import Animation from "../Animation/index.js";
-import AnimationManager from "../AnimationManager/index.js";
+import AnimatedEntity from "../../behaviors/AnimatedEntity/index.js";
+import Animation from "../../components/Animation/index.js";
 import { FruitsAnimationsStates } from "./state/animation.js";
 
-export default class Fruit{
+export default class Fruit extends AnimatedEntity{
   constructor(fruit, xPosition, yPosition){
+    super(xPosition, yPosition); 
+
     this.fruit = fruit;
-
     this.initializeAnimations();
-
-    this.x = xPosition;
-    this.y = yPosition;
   }
 
   initializeAnimations() {
@@ -18,12 +16,12 @@ export default class Fruit{
       [FruitsAnimationsStates.COLLECTED]: new Animation(`Sheets/fruits/Collected.png`, 6, 50, 32, 32, false),
     };
     
-    this.animationManager = new AnimationManager(animations);
+    super.initializeAnimations(animations);
   }
 
-  updateAnimation(){
-    this.animationManager.updateAnimation()
-  };
+  collect() {
+    this.setAnimation(FruitsAnimationsStates.COLLECTED);
+  }
 
   draw(){
     const { frameWidth, frameHeight, image } = this.animationManager.getCurrentAnimation()
@@ -31,7 +29,7 @@ export default class Fruit{
 
     image.startx = frameX;
     image.starty = 0;
-    image.endx = frameX +frameWidth;
+    image.endx = frameX + frameWidth;
     image.endy =frameHeight;
     image.width = frameWidth;
     image.height =frameHeight;

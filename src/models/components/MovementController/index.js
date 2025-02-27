@@ -1,7 +1,7 @@
 /**
  * Classe responsável por controlar o movimento de uma entidade no jogo
  */
-export class MovementController {
+export default class MovementController {
   /**
    * @param {Object} options - Opções de configuração do movimento
    * @param {number} options.gravity - Força da gravidade
