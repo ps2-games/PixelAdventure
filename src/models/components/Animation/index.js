@@ -2,7 +2,7 @@
  * Caminho para a pasta de assets do projeto.
  * @constant {string}
  */
-const PATH_TO_ASSETS = './src/assets/';
+const PATH_TO_ASSETS = './assets/';
 
 /**
  * Classe responsável por lidar com animações baseadas em spritesheets.

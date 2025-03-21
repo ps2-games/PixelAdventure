@@ -1,9 +1,7 @@
 import AnimationManager from "../../components/AnimationManager/index.js";
-import Entity from "../Entity/index.js";
 
-export default class AnimatedEntity extends Entity {
-  constructor(x = 0, y = 0, animations = null) {
-    super(x, y);
+export default class Animatable {
+  constructor(animations = null) {
     this.animationManager = animations ? new AnimationManager(animations) : null;
     this.flipX = false;
   }
@@ -26,10 +24,5 @@ export default class AnimatedEntity extends Entity {
     if (this.animationManager) {
       this.animationManager.setAnimation(state);
     }
-  }
-
-  update() {
-    super.update();
-    this.updateAnimation();
   }
 }

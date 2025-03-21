@@ -1,9 +1,7 @@
 import MovementController from "../../components/MovementController/index.js";
-import AnimatedEntity from "../AnimatedEntity/index.js";
 
-export default class MovableEntity extends AnimatedEntity {
+export default class Movable {
   constructor(x = 0, y = 0, movementOptions = {}) {
-    super(x, y);
     this._x = x;
     this._y = y;
     this.movement =
@@ -15,16 +13,19 @@ export default class MovableEntity extends AnimatedEntity {
           })
         : null;
   }
+
   initializeMovement(options) {
     this.movement = new MovementController({
       ...options,
-      initialX: this.x,
-      initialY: this.y,
+      initialX: this._x,
+      initialY: this._y,
     });
   }
+
   get x() {
     return this.movement ? this.movement.getPosition().x : this._x;
   }
+
   set x(value) {
     if (this.movement) {
       const position = this.movement.getPosition();
@@ -33,9 +34,11 @@ export default class MovableEntity extends AnimatedEntity {
       this._x = value;
     }
   }
+
   get y() {
     return this.movement ? this.movement.getPosition().y : this._y;
   }
+
   set y(value) {
     if (this.movement) {
       const position = this.movement.getPosition();
@@ -44,10 +47,10 @@ export default class MovableEntity extends AnimatedEntity {
       this._y = value;
     }
   }
+
   update() {
     if (this.movement) {
       this.movement.update();
     }
-    super.update();
   }
 }

@@ -1,45 +1,50 @@
-import ControllableEntity from "../../behaviors/ControllableEntity/index.js";
+import Animatable from "../../behaviors/Animatable/index.js";
+import Controllable from "../../behaviors/Controllable/index.js";
+import Movable from "../../behaviors/Movable/index.js";
 import Animation from "../../components/Animation/index.js";
+import Entity from "../Entity/index.js";
 import { PlayerMovementConstants } from "./constants/movement.js";
 import { PlayerAnimationsStates } from "./state/animations.js";
 
-export default class Player extends ControllableEntity {
+export default class Player extends Entity {
   /**
    * @param {number} canvasWidth - Largura do canvas do jogo
    * @param {number} canvasHeight - Altura do canvas do jogo
    * @param {object} options - Opções de configuração do jogador
    */
   constructor(canvasWidth, canvasHeight, options = {}) {
-    super(0, 0, {}, Pads.get());
+    super(0, 0, 32, 32);
 
-    this.initializeAnimations();
+    this.addBehavior(new Controllable(Pads.get()));
+    this.addBehavior(new Animatable());
 
-    const spriteHeight = this.getCurrentAnimation().frameHeight;
-    const groundLevel = canvasHeight - spriteHeight;
-
-    this.initializeMovement({
+    this.addBehavior(new Movable(0, 0, {
       gravity: options.gravity || PlayerMovementConstants.DEFAULT_GRAVITY,
       jumpStrength: options.jumpStrength || PlayerMovementConstants.DEFAULT_JUMP_STRENGTH,
       speed: options.speed || PlayerMovementConstants.DEFAULT_SPEED,
       minX: 0,
-      maxX: canvasWidth - this.getCurrentAnimation().frameWidth,
-      maxY: groundLevel,
-      onJump: () => super.setAnimation(PlayerAnimationsStates.JUMP),
+      maxX: canvasWidth - 32,
+      maxY: canvasHeight - 32,
+      onJump: () => this.getBehavior("Animatable").setAnimation(PlayerAnimationsStates.JUMP),
       onLand: () => {
-        if (this.movement.getVelocity().x !== 0) {
-          super.setAnimation(PlayerAnimationsStates.RUN);
+        const velocity = this.getBehavior("Movable").movement.getVelocity();
+        if (velocity.x !== 0) {
+          this.getBehavior("Animatable").setAnimation(PlayerAnimationsStates.RUN);
         } else {
-          super.setAnimation(PlayerAnimationsStates.IDLE);
+          this.getBehavior("Animatable").setAnimation(PlayerAnimationsStates.IDLE);
         }
       },
       onDirectionChange: (direction) => {
         this.flipX = direction === PlayerMovementConstants.DIRECTION.LEFT;
       },
-    });
+    }));
 
-    this.movement.setPosition(0, groundLevel);
-    
+    const groundLevel = canvasHeight - 32;
+    this.getBehavior("Movable").movement.setPosition(0, groundLevel);
+
+    this.initializeAnimations();
   }
+
   /**
    * Inicializa todas as animações do jogador
    */
@@ -79,16 +84,18 @@ export default class Player extends ControllableEntity {
       ),
     };
 
-    super.initializeAnimations(animations);
+    this.getBehavior("Animatable").initializeAnimations(animations);
   }
+
   /**
    * Atualiza o estado da animação baseado no estado do jogador
    */
   updateAnimation() {
-    super.updateAnimation();
+    const animatable = this.getBehavior("Animatable");
+    const movable = this.getBehavior("Movable");
 
-    const velocity = this.movement.getVelocity();
-    const currentState = this.animationManager.getCurrentAnimation();
+    const velocity = movable.movement.getVelocity();
+    const currentState = animatable.getCurrentAnimation();
 
     let newState = PlayerAnimationsStates.IDLE;
 
@@ -101,51 +108,59 @@ export default class Player extends ControllableEntity {
     }
 
     if (currentState !== newState) {
-      super.setAnimation(newState);
+      animatable.setAnimation(newState);
     }
+
+    animatable.updateAnimation();
   }
+
   /**
    * Processa os inputs do jogador
    */
   handleInput() {
-    this.inputController.update();
+    const controllable = this.getBehavior("Controllable");
+    const movable = this.getBehavior("Movable");
+
+    controllable.inputController.update();
 
     let moving = false;
 
-    if (this.inputController.pressed(Pads.RIGHT)) {
-      this.movement.moveRight();
+    if (controllable.inputController.pressed(Pads.RIGHT)) {
+      movable.movement.moveRight();
       moving = true;
-    } else if (this.inputController.pressed(Pads.LEFT)) {
-      this.movement.moveLeft();
+    } else if (controllable.inputController.pressed(Pads.LEFT)) {
+      movable.movement.moveLeft();
       moving = true;
     }
 
     if (!moving) {
-      this.movement.stopHorizontalMovement();
+      movable.movement.stopHorizontalMovement();
     }
 
-    if (this.inputController.pressed(Pads.UP)) {
-      this.movement.jump();
+    if (controllable.inputController.pressed(Pads.UP)) {
+      movable.movement.jump();
     }
   }
+
   /**
    * Atualiza o jogador
    */
   update() {
     this.handleInput();
-
-    this.movement.update();
-
+    this.getBehavior("Movable").update();
     this.updateAnimation();
   }
+
   /**
    * Renderiza o jogador na tela
    */
   draw() {
-    const { frameWidth, frameHeight, image } =
-      this.animationManager.getCurrentAnimation();
-    const frameX = this.animationManager.getCurrentFrame() * frameWidth;
-    const position = this.movement.getPosition();
+    const animatable = this.getBehavior("Animatable");
+    const movable = this.getBehavior("Movable");
+
+    const { frameWidth, frameHeight, image } = animatable.getCurrentAnimation();
+    const frameX = animatable.animationManager.getCurrentFrame() * frameWidth;
+    const position = movable.movement.getPosition();
 
     image.startx = frameX;
     image.starty = 0;
