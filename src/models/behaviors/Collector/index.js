@@ -6,9 +6,9 @@ export default class Collector {
   collect(item) {
     const collectable = item.getBehavior("Collectable");
     if (collectable && !collectable.isCollected) {
-      collectable.collect();
+      item.collect();
       this.collectedItems.push(item);
-      console.log("Item adicionado à coleção!");
+      console.log(this.collectedItems.map((item) => Object.entries(item)))
     }
   }
 }

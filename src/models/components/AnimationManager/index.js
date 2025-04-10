@@ -55,15 +55,45 @@ export default class AnimationManager {
    */
   updateAnimation() {
     if (!this.currentAnimation) return;
-
+  
+    if (this.isAnimationFinished()) {
+      return;
+    }
+  
     const now = Date.now();
     if (now - this.lastUpdate > this.currentAnimation.animationSpeed) {
-      this.currentFrame = (this.currentFrame + 1) % this.currentAnimation.totalFrames;
-      this.lastUpdate = now;
-
-      if (!this.currentAnimation.loop && this.currentFrame === this.currentAnimation.totalFrames - 1) {
-        this.currentFrame = 0;
+      this.currentFrame++;
+  
+      if (this.currentFrame >= this.currentAnimation.totalFrames) {
+        if (this.currentAnimation.loop) {
+          this.currentFrame = 0;
+        } else {
+          this.currentFrame = this.currentAnimation.totalFrames - 1;
+          this.markAnimationAsFinished();
+        }
       }
+  
+      this.lastUpdate = now;
+    }
+  }
+  
+  /**
+   * Verifica se a animação não-loop chegou ao fim.
+   * @returns {boolean}
+   */
+  isAnimationFinished() {
+    return (
+      !this.currentAnimation.loop &&
+      this.currentFrame === this.currentAnimation.totalFrames - 1
+    );
+  }
+  
+  /**
+   * Marca a animação como concluída e executa o callback (se existir).
+   */
+  markAnimationAsFinished() {
+    if (this.currentAnimation.onAnimationEnd) {
+      this.currentAnimation.onAnimationEnd();
     }
   }
 

@@ -1,4 +1,5 @@
 import Animatable from "../../behaviors/Animatable/index.js";
+import Collector from "../../behaviors/Collector/index.js";
 import Controllable from "../../behaviors/Controllable/index.js";
 import Movable from "../../behaviors/Movable/index.js";
 import Animation from "../../components/Animation/index.js";
@@ -41,6 +42,7 @@ export default class Player extends Entity {
 
     const groundLevel = canvasHeight - 32;
     this.getBehavior("Movable").movement.setPosition(0, groundLevel);
+    this.addBehavior(new Collector())
 
     this.initializeAnimations();
   }
@@ -149,6 +151,40 @@ export default class Player extends Entity {
     this.handleInput();
     this.getBehavior("Movable").update();
     this.updateAnimation();
+  }
+
+  getBounds() {
+    const movable = this.getBehavior("Movable");
+    const position = movable.movement.getPosition();
+    const animatable = this.getBehavior("Animatable");
+    const { frameWidth, frameHeight } = animatable.getCurrentAnimation()
+
+    return {
+      left: position.x,
+      top: position.y,
+      right: position.x + frameWidth,
+      bottom: position.y + frameHeight,
+    };
+  }
+
+  isColliding(otherEntity) {
+    if (!this.canCollide || !otherEntity.canCollide) {
+      return false;
+    }
+
+    const a = this.getBounds();
+    const b = otherEntity.getBounds();
+
+    return (
+      a.left < b.right &&
+      a.right > b.left &&
+      a.top < b.bottom &&
+      a.bottom > b.top
+    );
+  }
+
+  collectItem(item){
+    this.getBehavior("Collector").collect(item)
   }
 
   /**

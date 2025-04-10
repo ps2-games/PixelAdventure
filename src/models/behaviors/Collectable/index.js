@@ -6,7 +6,6 @@ export default class Collectable {
   collect() {
     if (!this.isCollected) {
       this.isCollected = true;
-      console.log("Item coletado!");
     }
   }
 }

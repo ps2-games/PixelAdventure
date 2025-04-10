@@ -24,11 +24,11 @@ export default class Scene {
         this.background.draw(0, 0);
         this.player.handleInput();
 
-        this.apple.getBehavior("Animatable").updateAnimation();
+        this.apple.update();
         this.apple.draw();
 
         if(this.player.isColliding(this.apple)){
-            this.apple.onCollision(this.player)
+            this.player.collectItem(this.apple)
         }
 
         this.player.update();

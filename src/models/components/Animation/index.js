@@ -17,12 +17,13 @@ export default class Animation {
    * @param {number} frameHeight - A altura de cada frame no spritesheet.
    * @param {boolean} loop - Define se a animação será repetida em loop.
    */
-  constructor(spritesheetPath, totalFrames, animationSpeed, frameWidth, frameHeight, loop) {
+  constructor(spritesheetPath, totalFrames, animationSpeed, frameWidth, frameHeight, loop, onAnimationEnd) {
     this.totalFrames = totalFrames;
     this.animationSpeed = animationSpeed;
     this.frameWidth = frameWidth;
     this.frameHeight = frameHeight;
     this.loop = loop;
     this.image = new Image(PATH_TO_ASSETS + spritesheetPath);
+    this.onAnimationEnd = onAnimationEnd
   }
 }

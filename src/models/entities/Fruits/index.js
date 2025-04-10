@@ -1,4 +1,5 @@
 import Animatable from "../../behaviors/Animatable/index.js";
+import Collectable from "../../behaviors/Collectable/index.js";
 import Animation from "../../components/Animation/index.js";
 import Entity from "../Entity/index.js";
 import { FruitsAnimationsStates } from "./state/animation.js";
@@ -13,6 +14,8 @@ export default class Fruit extends Entity {
     this.addBehavior(new Animatable());
 
     this.initializeAnimations();
+
+    this.addBehavior(new Collectable());
   }
 
   /**
@@ -26,7 +29,8 @@ export default class Fruit extends Entity {
         50,
         32,
         32,
-        true
+        true,
+        () => {}
       ),
       [FruitsAnimationsStates.COLLECTED]: new Animation(
         `Sheets/fruits/Collected.png`,
@@ -34,7 +38,10 @@ export default class Fruit extends Entity {
         50,
         32,
         32,
-        false
+        false,
+        () => {
+          console.log("Acabou a animação")
+        }
       ),
     };
 
@@ -46,6 +53,11 @@ export default class Fruit extends Entity {
    */
   collect() {
     this.getBehavior("Animatable").setAnimation(FruitsAnimationsStates.COLLECTED);
+    this.getBehavior("Collectable").collect()
+  }
+
+  update(){
+    this.getBehavior("Animatable").updateAnimation()
   }
 
   /**
@@ -66,4 +78,5 @@ export default class Fruit extends Entity {
 
     image.draw(this.x, this.y);
   }
+
 }
