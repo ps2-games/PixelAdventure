@@ -52,11 +52,20 @@ export default class Fruit extends Entity {
    * Coleta a fruta
    */
   collect() {
+    if (this.isCollected) return;
+    
     this.getBehavior("Animatable").setAnimation(FruitsAnimationsStates.COLLECTED);
     this.getBehavior("Collectable").collect()
   }
 
-  update(){
+  update(collector){
+    if(this.getBehavior("Collectable").isCollected || !collector.getBehavior("Collector")) return;
+
+    if(collector && this.isColliding(collector)){
+      collector.getBehavior("Collector").collect(this)
+      this.collect();
+    }
+
     this.getBehavior("Animatable").updateAnimation()
   }
 

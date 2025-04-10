@@ -17,20 +17,23 @@ export default class Scene {
         this.configBackground(width, height)
 
         this.player = new Player(width, height);
-        this.apple = new Fruit("Apple", width / 2, height - 32);
+        this.fruits = [
+            new Fruit("Apple", width / 2, height - 32),
+            new Fruit("Apple", (width / 2) - 32, height - 32),
+            new Fruit("Apple", (width / 2) - 64, height - 32),
+            new Fruit("Apple", (width / 2) - 96, height - 32)
+        ];
     }
 
     update() {
         this.background.draw(0, 0);
         this.player.handleInput();
 
-        this.apple.update();
-        this.apple.draw();
-
-        if(this.player.isColliding(this.apple)){
-            this.player.collectItem(this.apple)
-        }
-
+        this.fruits.filter(fruit => !fruit.getBehavior("Collectable").isCollected).forEach(fruit => {
+            fruit.update(this.player);
+            fruit.draw();
+        });
+    
         this.player.update();
         this.player.draw();
     }
