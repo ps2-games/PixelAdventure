@@ -56,10 +56,6 @@ export default class AnimationManager {
   updateAnimation() {
     if (!this.currentAnimation) return;
   
-    if (this.isAnimationFinished()) {
-      return;
-    }
-  
     const now = Date.now();
     if (now - this.lastUpdate > this.currentAnimation.animationSpeed) {
       this.currentFrame++;
@@ -69,7 +65,10 @@ export default class AnimationManager {
           this.currentFrame = 0;
         } else {
           this.currentFrame = this.currentAnimation.totalFrames - 1;
-          this.markAnimationAsFinished();
+
+          if (this.currentAnimation.onAnimationEnd) {
+            this.currentAnimation.onAnimationEnd();
+          }
         }
       }
   
@@ -86,15 +85,6 @@ export default class AnimationManager {
       !this.currentAnimation.loop &&
       this.currentFrame === this.currentAnimation.totalFrames - 1
     );
-  }
-  
-  /**
-   * Marca a animação como concluída e executa o callback (se existir).
-   */
-  markAnimationAsFinished() {
-    if (this.currentAnimation.onAnimationEnd) {
-      this.currentAnimation.onAnimationEnd();
-    }
   }
 
   /**

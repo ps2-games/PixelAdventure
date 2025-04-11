@@ -29,8 +29,7 @@ export default class Fruit extends Entity {
         50,
         32,
         32,
-        true,
-        () => {}
+        true
       ),
       [FruitsAnimationsStates.COLLECTED]: new Animation(
         `Sheets/fruits/Collected.png`,
@@ -38,10 +37,7 @@ export default class Fruit extends Entity {
         50,
         32,
         32,
-        false,
-        () => {
-          console.log("Acabou a animação")
-        }
+        false
       ),
     };
 
@@ -52,21 +48,31 @@ export default class Fruit extends Entity {
    * Coleta a fruta
    */
   collect() {
-    if (this.isCollected) return;
-    
+    if (this.getBehavior("Collectable").isCollected) return;
     this.getBehavior("Animatable").setAnimation(FruitsAnimationsStates.COLLECTED);
-    this.getBehavior("Collectable").collect()
+    this.getBehavior("Collectable").collect();
   }
 
-  update(collector){
-    if(this.getBehavior("Collectable").isCollected || !collector.getBehavior("Collector")) return;
-
-    if(collector && this.isColliding(collector)){
-      collector.getBehavior("Collector").collect(this)
-      this.collect();
+  update(collector) {
+    if (this.getBehavior("Collectable").isCollected) {
+      this.getBehavior("Animatable").updateAnimation();
+      return;
     }
 
-    this.getBehavior("Animatable").updateAnimation()
+    if (collector && this.isColliding(collector)) {
+      collector.getBehavior("Collector").collect(this);
+    }
+
+    this.getBehavior("Animatable").updateAnimation();
+  }
+
+  shouldRemove() {
+    const collectable = this.getBehavior("Collectable");
+    const animatable = this.getBehavior("Animatable");
+    return (
+      collectable.isCollected &&
+      animatable.animationManager.isAnimationFinished()
+    );
   }
 
   /**

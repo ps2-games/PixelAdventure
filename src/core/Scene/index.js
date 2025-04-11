@@ -3,10 +3,11 @@ import Player from "../../models/entities/Player/index.js";
 
 export default class Scene {
     constructor() {
+        this.fruits = []
         this.init();
     }
 
-    configBackground(screenWidth = 640, screenHeight = 448, color = "brown"){
+    configBackground(screenWidth = 640, screenHeight = 448, color = "brown") {
         this.background = new Image(`./assets/background/bg-${color}.png`);
         this.background.width = screenWidth;
         this.background.height = screenHeight;
@@ -17,24 +18,31 @@ export default class Scene {
         this.configBackground(width, height)
 
         this.player = new Player(width, height);
-        this.fruits = [
-            new Fruit("Apple", width / 2, height - 32),
-            new Fruit("Apple", (width / 2) - 32, height - 32),
-            new Fruit("Apple", (width / 2) - 64, height - 32),
-            new Fruit("Apple", (width / 2) - 96, height - 32)
-        ];
+
+        this.addFruit("Apple", width / 2, height - 32);
+        this.addFruit("Apple", (width / 2) - 32, height - 32);
+        this.addFruit("Apple", (width / 2) - 64, height - 32);
+        this.addFruit("Apple", (width / 2) - 96, height - 32);
+    }
+
+    addFruit(type, x, y) {
+        const fruit = new Fruit(type, x, y)
+
+        this.fruits.push(fruit)
     }
 
     update() {
         this.background.draw(0, 0);
         this.player.handleInput();
-
-        this.fruits.filter(fruit => !fruit.getBehavior("Collectable").isCollected).forEach(fruit => {
-            fruit.update(this.player);
-            fruit.draw();
+    
+        this.fruits.forEach(fruit => {
+          fruit.update(this.player);
+          fruit.draw();
         });
     
+        this.fruits = this.fruits.filter(fruit => !fruit.shouldRemove());
+
         this.player.update();
         this.player.draw();
-    }
+      }
 }
