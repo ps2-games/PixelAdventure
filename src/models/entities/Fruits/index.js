@@ -6,7 +6,7 @@ import { FruitsAnimationsStates } from "./state/animation.js";
 
 export default class Fruit extends Entity {
 
-  constructor(fruit, xPosition, yPosition) {
+  constructor(fruit, xPosition, yPosition, collectedSound) {
     super(xPosition, yPosition, 32, 32);
 
     this.fruit = fruit;
@@ -16,6 +16,7 @@ export default class Fruit extends Entity {
     this.initializeAnimations();
 
     this.addBehavior(new Collectable());
+    this.collectedSound = collectedSound
   }
 
   /**
@@ -44,23 +45,28 @@ export default class Fruit extends Entity {
     this.getBehavior("Animatable").initializeAnimations(animations);
   }
 
-  /**
+    /**
    * Coleta a fruta
    */
-  collect() {
-    if (this.getBehavior("Collectable").isCollected) return;
-    this.getBehavior("Animatable").setAnimation(FruitsAnimationsStates.COLLECTED);
-    this.getBehavior("Collectable").collect();
-  }
+    collect(scene) {
+      if (this.getBehavior("Collectable").isCollected) return;
+      Sound.play(this.collectedSound, scene.fruitSlot);
 
-  update(collector) {
+      scene.fruitSlot = (scene.fruitSlot + 1) & (scene.fruitSlotSize - 1);
+
+      this.getBehavior("Animatable").setAnimation(FruitsAnimationsStates.COLLECTED);
+      this.getBehavior("Collectable").collect();
+    }
+
+
+  update(collector, scene) {
     if (this.getBehavior("Collectable").isCollected) {
       this.getBehavior("Animatable").updateAnimation();
       return;
     }
 
     if (collector && this.isColliding(collector)) {
-      collector.getBehavior("Collector").collect(this);
+      collector.getBehavior("Collector").collect(this, scene);
     }
 
     this.getBehavior("Animatable").updateAnimation();

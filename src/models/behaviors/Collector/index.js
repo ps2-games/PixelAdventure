@@ -3,10 +3,10 @@ export default class Collector {
     this.collectedItems = [];
   }
 
-  collect(item) {
+  collect(item, scene) {
     const collectable = item.getBehavior("Collectable");
     if (collectable && !collectable.isCollected) {
-      item.collect();
+      item.collect(scene);
       this.collectedItems.push(item.fruit);
     }
   }

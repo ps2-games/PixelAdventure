@@ -187,6 +187,10 @@ export default class Player extends Entity {
     this.getBehavior("Collector").collect(item)
   }
 
+  // drawUi(){
+  //   const inventory = this.getBehavior("Collector").collectedItems;
+  // }
+
   /**
    * Renderiza o jogador na tela
    */
