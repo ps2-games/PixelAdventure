@@ -14,12 +14,12 @@ export default class Player extends Entity {
    * @param {object} options - Opções de configuração do jogador
    */
   constructor(canvasWidth, canvasHeight, options = {}) {
-    super(0, 0, 32, 32);
+    super(options.initialX || 0, options.initialY || 0, 32, 32);
 
     this.addBehavior(new Controllable(Pads.get()));
     this.addBehavior(new Animatable());
 
-    this.addBehavior(new Movable(0, 0, {
+    this.addBehavior(new Movable(options.initialX || 0, options.initialY || 0, {
       gravity: options.gravity || PlayerMovementConstants.DEFAULT_GRAVITY,
       jumpStrength: options.jumpStrength || PlayerMovementConstants.DEFAULT_JUMP_STRENGTH,
       speed: options.speed || PlayerMovementConstants.DEFAULT_SPEED,
@@ -27,6 +27,7 @@ export default class Player extends Entity {
       maxX: canvasWidth - 32,
       maxY: canvasHeight - 32,
       onJump: () => this.getBehavior("Animatable").setAnimation(PlayerAnimationsStates.JUMP),
+      onDoubleJump: () => this.getBehavior("Animatable").setAnimation(PlayerAnimationsStates.DOUBLE_JUMP),
       onLand: () => {
         const velocity = this.getBehavior("Movable").movement.getVelocity();
         if (velocity.x !== 0) {
@@ -40,8 +41,8 @@ export default class Player extends Entity {
       },
     }));
 
-    const groundLevel = canvasHeight - 32;
-    this.getBehavior("Movable").movement.setPosition(0, groundLevel);
+    const groundLevel = options.initialY || canvasHeight - 32;
+    this.getBehavior("Movable").movement.setPosition(options.initialX || 0, groundLevel);
     this.addBehavior(new Collector())
 
     this.initializeAnimations();
@@ -76,6 +77,14 @@ export default class Player extends Entity {
         32,
         false
       ),
+      [PlayerAnimationsStates.DOUBLE_JUMP]: new Animation(
+        "Sheets/ninjaFrog/Double_Jump.png",
+        6,
+        100,
+        32,
+        32,
+        true
+      ),
       [PlayerAnimationsStates.FALL]: new Animation(
         "Sheets/ninjaFrog/Fall.png",
         1,
@@ -97,11 +106,14 @@ export default class Player extends Entity {
     const movable = this.getBehavior("Movable");
 
     const velocity = movable.movement.getVelocity();
+    const jumpsRemaining = movable.movement.state.jumpsRemaining;
     const currentState = animatable.getCurrentAnimation();
 
     let newState = PlayerAnimationsStates.IDLE;
 
-    if (velocity.y < 0) {
+    if (velocity.y < 0 && jumpsRemaining === 0) {
+      newState = PlayerAnimationsStates.DOUBLE_JUMP;
+    } else if (velocity.y < 0) {
       newState = PlayerAnimationsStates.JUMP;
     } else if (velocity.y > 0) {
       newState = PlayerAnimationsStates.FALL;
@@ -139,7 +151,7 @@ export default class Player extends Entity {
       movable.movement.stopHorizontalMovement();
     }
 
-    if (controllable.inputController.pressed(Pads.UP)) {
+    if (controllable.inputController.justPressed(Pads.UP)) {
       movable.movement.jump();
     }
   }
@@ -183,7 +195,7 @@ export default class Player extends Entity {
     );
   }
 
-  collectItem(item){
+  collectItem(item) {
     this.getBehavior("Collector").collect(item)
   }
 

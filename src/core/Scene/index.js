@@ -21,7 +21,7 @@ export default class Scene {
 
     init() {
         const { width, height } = Screen.getMode();
-        this.player = new Player(width, height);
+        this.player = new Player(width, height, { initialX: width / 2, initialY: height / 2 });
         this.fruitManager = new FruitManager(this.player);
         this.tileMapRender = new TileMapRender();
 

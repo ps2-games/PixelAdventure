@@ -6,5 +6,6 @@ export const PlayerAnimationsStates = {
   IDLE: 'IDLE',
   RUN: 'RUN',
   JUMP: 'JUMP',
-  FALL: 'FALL'
+  FALL: 'FALL',
+  DOUBLE_JUMP: 'DOUBLE_JUMP'
 };

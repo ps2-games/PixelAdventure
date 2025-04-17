@@ -6,10 +6,4 @@ export default class Controllable {
   setInputController(controller) {
     this.inputController = controller;
   }
-
-  handleInput() {
-    if (this.inputController) {
-      console.log("Processando input...");
-    }
-  }
 }
