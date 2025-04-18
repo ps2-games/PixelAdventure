@@ -2,7 +2,8 @@ const TileTypes = {
     BACKGROUND: 'background',
     GROUND: 'ground',
     PLATFORM: 'platform',
-    DECORATION: 'decoration'
+    DECORATION: 'decoration',
+    WALL: 'wall',
 };
 
 export default TileTypes

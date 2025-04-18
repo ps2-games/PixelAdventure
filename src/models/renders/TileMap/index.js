@@ -11,7 +11,7 @@ export default class TileMapRender {
         const tileMap = [];
         const tileset = new Image('./assets/tileset/Terrain16x16.png');
 
-        for (const { tileColumn, tileRow, tileX, tileY } of mapLevel1) {
+        for (const { tileColumn, tileRow, tileX, tileY, type } of mapLevel1) {
             tileMap.push({
                 tileset,
                 startx: tileColumn * TILE_SIZE,
@@ -19,7 +19,10 @@ export default class TileMapRender {
                 endx: tileColumn * TILE_SIZE + TILE_SIZE,
                 endy: tileRow * TILE_SIZE + TILE_SIZE,
                 x: tileX,
-                y: tileY
+                y: tileY,
+                type,
+                width: TILE_SIZE,
+                height: TILE_SIZE,
             });
         }
 

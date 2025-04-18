@@ -1,3 +1,6 @@
+import TileProperties from "../../../@types/tile-properties.js";
+import TileTypes from "../../../@types/tile-types.js";
+
 /**
  * Classe responsável por controlar o movimento de uma entidade no jogo
  */
@@ -53,6 +56,11 @@ export default class MovementController {
       onDirectionChange: options.onDirectionChange,
       onMove: options.onMove
     };
+
+    this.tileMap = options.tileMap || [];
+    this.entity = options.entity;
+
+    console.log(Object.entries((options.entity)))
   }
 
   /**
@@ -69,6 +77,87 @@ export default class MovementController {
     this.checkBoundaryCollisions();
   }
 
+  checkTileCollision(newX, newY, direction) {
+    const bounds = {
+      left: newX,
+      right: newX + this.entity.width,
+      top: newY,
+      bottom: newY + this.entity.height
+    };
+
+    let closestCollision = null;
+    let minDistance = Infinity;
+
+    const nearbyTiles = this.tileMap.filter(tile => {
+      return (
+          Math.abs(tile.x - newX) < 100 &&
+          Math.abs(tile.y - newY) < 100
+      );
+    });
+
+    for (const tile of nearbyTiles) {
+      const tileProps = TileProperties[tile.type] || TileProperties[TileTypes.DECORATION];
+      if (!tileProps.collidable) continue;
+
+      const tileBounds = {
+        left: tile.x,
+        right: tile.x + tile.width,
+        top: tile.y,
+        bottom: tile.y + tile.height,
+      };
+
+      if (
+          bounds.left < tileBounds.right &&
+          bounds.right > tileBounds.left &&
+          bounds.top < tileBounds.bottom &&
+          bounds.bottom > tileBounds.top
+      ) {
+        if (tileProps.isPlatform) {
+          if (this.velocity.y > 0) {
+            const steps = Math.max(1, Math.ceil(Math.abs(this.velocity.y * 2)));
+            for (let i = 0; i <= steps; i++) {
+              const testY = this.position.y + (newY - this.position.y) * (i / steps);
+              const testBounds = {
+                ...bounds,
+                top: testY,
+                bottom: testY + this.entity.height
+              };
+
+              if (
+                  testBounds.bottom >= tileBounds.top &&
+                  testBounds.bottom <= tileBounds.top + 10 &&
+                  testBounds.right > tileBounds.left + 5 &&
+                  testBounds.left < tileBounds.right - 5
+              ) {
+                return { tile, tileProps };
+              }
+            }
+          }
+          continue;
+        }
+
+        let distance;
+        if (direction === 'horizontal') {
+          distance = Math.min(
+              Math.abs(bounds.right - tileBounds.left),
+              Math.abs(tileBounds.right - bounds.left)
+          );
+        } else {
+          distance = Math.min(
+              Math.abs(bounds.bottom - tileBounds.top),
+              Math.abs(tileBounds.bottom - bounds.top)
+          );
+        }
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCollision = { tile, tileProps };
+        }
+      }
+    }
+    return closestCollision;
+  }
+
   /**
    * Aplica a força da gravidade
    * @param {number} deltaTime - Tempo decorrido desde o último frame
@@ -80,12 +169,62 @@ export default class MovementController {
   }
 
   /**
-   * Atualiza a posição com base na velocidade
+   * Atualiza a posição com base na velocidade, considerando colisões com tiles
    * @param {number} deltaTime - Tempo decorrido desde o último frame
    */
   updatePosition(deltaTime) {
-    this.position.x += this.velocity.x * deltaTime;
-    this.position.y += this.velocity.y * deltaTime;
+    const wasGrounded = this.state.isGrounded;
+
+    let newX = this.position.x + this.velocity.x * deltaTime;
+    let newY = this.position.y + this.velocity.y * deltaTime;
+
+    if (this.velocity.y !== 0) {
+      const vCollision = this.checkTileCollision(this.position.x, newY, 'vertical');
+      if (vCollision) {
+        if (vCollision.tileProps.isPlatform) {
+          if (this.velocity.y > 0 && this.position.y + this.entity.height <= vCollision.tile.y) {
+            newY = vCollision.tile.y - this.entity.height;
+            this.velocity.y = 0;
+            this.state.isGrounded = true;
+            this.state.jumpsRemaining = this.state.maxJumps;
+            if (!wasGrounded && this.callbacks.onLand) {
+              this.callbacks.onLand();
+            }
+          }
+        } else if (vCollision.tileProps.collidable) {
+          if (this.velocity.y > 0) {
+            newY = vCollision.tile.y - this.entity.height;
+            this.velocity.y = 0;
+            this.state.isGrounded = true;
+            this.state.jumpsRemaining = this.state.maxJumps;
+            if (!wasGrounded && this.callbacks.onLand) {
+              this.callbacks.onLand();
+            }
+          } else if (this.velocity.y < 0) {
+            newY = vCollision.tile.y + vCollision.tile.height;
+            this.velocity.y = 0;
+            this.state.isJumping = false;
+          }
+        }
+      } else {
+        this.state.isGrounded = false;
+      }
+    }
+
+    if (this.velocity.x !== 0) {
+      const hCollision = this.checkTileCollision(newX, this.position.y, 'horizontal');
+      if (hCollision && hCollision.tileProps.collidable && !hCollision.tileProps.isPlatform) {
+        if (this.velocity.x > 0) {
+          newX = hCollision.tile.x - this.entity.width;
+        } else if (this.velocity.x < 0) {
+          newX = hCollision.tile.x + hCollision.tile.width;
+        }
+        this.velocity.x = 0;
+      }
+    }
+
+    this.position.x = newX;
+    this.position.y = newY;
 
     if (this.callbacks.onMove) {
       this.callbacks.onMove(this.position.x, this.position.y);

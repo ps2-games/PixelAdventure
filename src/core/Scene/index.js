@@ -21,11 +21,12 @@ export default class Scene {
 
     init() {
         const { width, height } = Screen.getMode();
-        this.player = new Player(width, height, { initialX: width / 2, initialY: height / 2 });
-        this.fruitManager = new FruitManager(this.player);
         this.tileMapRender = new TileMapRender();
-
         this.tileMapRender.createTileMap();
+
+        this.player = new Player(width, height, { initialX: width / 2, initialY: height / 2, tileMap: this.tileMapRender.tileMap });
+        this.fruitManager = new FruitManager(this.player);
+
         fruitsLevel1.forEach((fruit) => this.fruitManager.addFruit(fruit.type, fruit.x, fruit.y))
 
     }

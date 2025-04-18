@@ -26,6 +26,8 @@ export default class Player extends Entity {
       minX: 0,
       maxX: canvasWidth - 32,
       maxY: canvasHeight - 32,
+      tileMap: options.tileMap,
+      entity: this,
       onJump: () => this.getBehavior("Animatable").setAnimation(PlayerAnimationsStates.JUMP),
       onDoubleJump: () => this.getBehavior("Animatable").setAnimation(PlayerAnimationsStates.DOUBLE_JUMP),
       onLand: () => {
