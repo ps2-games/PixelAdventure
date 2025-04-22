@@ -1,17 +1,19 @@
 import Player from "../../models/entities/Player/index.js";
 import FruitManager from "../../models/managers/Fruit/index.js";
 import TileMapRender from "../../models/renders/TileMap/index.js";
-import backgroundConfigLevel1 from "../levels/level1/constants/backgroud.js";
-import fruitsLevel1 from "../levels/level1/constants/fruits.js";
 
 export default class Scene {
-    constructor() {
+    constructor({ backgroundConfig, tileMapConfig, fruits, traps, initialPlayerPosition }) {
         this.backgroundImage = new Image('./assets/background/defaultBg.png')
+        this.initialPlayerPosition = initialPlayerPosition;
+        this.tileMapConfig = tileMapConfig;
+        this.fruits = fruits;
+        this.traps = traps;
 
         this.background = {
-            tiles: backgroundConfigLevel1.tileMap,
-            image: new Image(`./assets/background/${backgroundConfigLevel1.color}.png`),
-            speed: backgroundConfigLevel1.speed,
+            tiles: backgroundConfig ? backgroundConfig.tileMap : null,
+            image: backgroundConfig ? new Image(`./assets/background/${backgroundConfig.color}.png`) : null,
+            speed: backgroundConfig ? backgroundConfig.speed : 0,
             offsetY: 0
         };
 
@@ -21,19 +23,24 @@ export default class Scene {
 
     init() {
         const { width, height } = Screen.getMode();
-        this.tileMapRender = new TileMapRender();
-        this.tileMapRender.createTileMap();
 
-        this.player = new Player(width, height, { initialX: width / 2, initialY: height / 2, tileMap: this.tileMapRender.tileMap });
-        this.fruitManager = new FruitManager(this.player);
+        if (this.tileMapConfig) {
+            this.tileMapRender = new TileMapRender(this.tileMapConfig);
+            this.player = new Player(width, height, { initialX: this.initialPlayerPosition.x, initialY: this.initialPlayerPosition.y, tileMap: this.tileMapRender.tileMap });
+            this.fruitManager = new FruitManager(this.player);
+        }
 
-        fruitsLevel1.forEach((fruit) => this.fruitManager.addFruit(fruit.type, fruit.x, fruit.y))
+        if (this.fruits) {
+            this.fruits.forEach((fruit) => this.fruitManager.addFruit(fruit.type, fruit.x, fruit.y))
+        }
 
     }
 
     drawBackgroundTile() {
-        for (const { tileX, tileY } of backgroundConfigLevel1.tileMap) {
-            this.background.image.draw(tileX, tileY);
+        if (this.background.tiles) {
+            for (const { tileX, tileY } of this.background.tiles) {
+                this.background.image.draw(tileX, tileY);
+            }
         }
     }
 

@@ -1,29 +1,30 @@
-import mapLevel1 from "../../../core/levels/level1/constants/map.js";
 import { TILE_SIZE } from "../../../core/Scene/constants/index.js";
 
 export default class TileMapRender {
 
-    constructor() {
-        this.tileMap = this.createTileMap();
+    constructor(tileMapConfig) {
+        this.tileMap = this.createTileMap(tileMapConfig);
     }
 
-    createTileMap() {
+    createTileMap(tileMapConfig) {
         const tileMap = [];
         const tileset = new Image('./assets/tileset/Terrain16x16.png');
 
-        for (const { tileColumn, tileRow, tileX, tileY, type } of mapLevel1) {
-            tileMap.push({
-                tileset,
-                startx: tileColumn * TILE_SIZE,
-                starty: tileRow * TILE_SIZE,
-                endx: tileColumn * TILE_SIZE + TILE_SIZE,
-                endy: tileRow * TILE_SIZE + TILE_SIZE,
-                x: tileX,
-                y: tileY,
-                type,
-                width: TILE_SIZE,
-                height: TILE_SIZE,
-            });
+        if (tileMapConfig) {
+            for (const { tileColumn, tileRow, tileX, tileY, type } of tileMapConfig) {
+                tileMap.push({
+                    tileset,
+                    startx: tileColumn * TILE_SIZE,
+                    starty: tileRow * TILE_SIZE,
+                    endx: tileColumn * TILE_SIZE + TILE_SIZE,
+                    endy: tileRow * TILE_SIZE + TILE_SIZE,
+                    x: tileX,
+                    y: tileY,
+                    type,
+                    width: TILE_SIZE,
+                    height: TILE_SIZE,
+                });
+            }
         }
 
         return tileMap;

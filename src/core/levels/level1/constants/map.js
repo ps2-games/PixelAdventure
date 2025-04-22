@@ -55,11 +55,11 @@ const fixedTiles = [
   { tileColumn: 4, tileRow: 4, tileX: 592, tileY: 280, type: TileTypes.WALL },
   { tileColumn: 0, tileRow: 6, tileX: 576, tileY: 280, type: TileTypes.WALL },
   { tileColumn: 3, tileRow: 4, tileX: 48, tileY: 104, type: TileTypes.WALL }, // leftTopSideWoodCorner
-  { tileColumn: 4, tileRow: 1, tileX: 592, tileY: 344, type: TileTypes.WALL }, // leftBottomStoneCorner
+  { tileColumn: 4, tileRow: 1, tileX: 592, tileY: 344, type: TileTypes.WALL }, // RightBottomStoneCorner
   { tileColumn: 3, tileRow: 5, tileX: 48, tileY: 344, type: TileTypes.WALL }, //leftBottomWoodCorner
   { tileColumn: 4, tileRow: 4, tileX: 576, tileY: 104, type: TileTypes.WALL }, // rightTopSideWoodCorner
   { tileColumn: 12, tileRow: 1, tileX: 96, tileY: 120, type: TileTypes.WALL }, // leftTopSmallBox
-  { tileColumn: 12, tileRow: 1, tileX: 576, tileY: 328 , type: TileTypes.WALL} // rightBottomSmallBox
+  { tileColumn: 12, tileRow: 1, tileX: 576, tileY: 328, type: TileTypes.WALL } // rightBottomSmallBox
 ];
 
 const mapLevel1 = [
