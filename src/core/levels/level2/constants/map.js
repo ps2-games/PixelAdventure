@@ -1,5 +1,6 @@
 import TileTypes from "../../../../@types/tile-types.js";
 import { TILE_SIZE } from "../../../Scene/constants/index.js";
+import ground from "./ground.js";
 
 const leftWoodWall = Array.from({ length: 22 }, (_, i) => ({
     tileColumn: 2,
@@ -59,6 +60,7 @@ const fixedTiles = [
 ]
 
 const mapLevel2 = [
+    ...ground,
     ...leftWoodWall,
     ...topStoneWall,
     ...rightWoodWall,

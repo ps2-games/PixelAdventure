@@ -7,8 +7,8 @@ const level2Config = {
     fruits: null,
     traps: null,
     initialPlayerPosition: {
-        x: 320,
-        y: 224
+        x: 64,
+        y: 336
     }
 }
 
