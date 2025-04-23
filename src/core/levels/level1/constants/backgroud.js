@@ -30,7 +30,7 @@ export const backgroundConfigLevel1 = {
     }));
   }).flat(),
   blanketMap: [...topBlanketTiles, ...bottomBlanketTiles],
-  color: 'Pink',
+  color: 'Brown',
   speed: 0.25,
   limitY: 48,
   resetY: 368

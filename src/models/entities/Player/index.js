@@ -173,6 +173,7 @@ export default class Player extends Entity {
     this.handleInput();
     this.getBehavior("Movable").update();
     this.updateAnimation();
+    this.draw();
   }
 
   getBounds() {

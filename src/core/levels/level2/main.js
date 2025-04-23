@@ -1,7 +1,8 @@
+import backgroundConfigLevel2 from "./constants/background.js";
 import mapLevel2 from "./constants/map.js";
 
 const level2Config = {
-    backgroundConfig: null,
+    backgroundConfig: backgroundConfigLevel2,
     tileMapConfig: mapLevel2,
     fruits: null,
     traps: null,

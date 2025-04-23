@@ -65,12 +65,11 @@ export default class Scene {
         this.backgroundImage.draw(0, 0);
         this.drawBackgroundTile();
         this.tileMapRender.render();
-
         this.fruitManager.update();
-
-        this.player.handleInput();
         this.player.update();
-        this.player.draw();
-        this.blanketTileMap.render();
+
+        if (this.blanketTileMap) {
+            this.blanketTileMap.render();
+        }
     }
 }
