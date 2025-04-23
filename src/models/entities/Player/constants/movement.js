@@ -23,5 +23,10 @@ export const PlayerMovementConstants = {
   DIRECTION: {
     LEFT: 'LEFT',
     RIGHT: 'RIGHT'
-  }
+  },
+
+  /**
+   * Velocidade de deslize na parede
+   */
+  WALL_SLIDE_SPEED: 2
 };

@@ -7,5 +7,6 @@ export const PlayerAnimationsStates = {
   RUN: 'RUN',
   JUMP: 'JUMP',
   FALL: 'FALL',
-  DOUBLE_JUMP: 'DOUBLE_JUMP'
+  DOUBLE_JUMP: 'DOUBLE_JUMP',
+  WALL_JUMP: 'WALL_JUMP'
 };

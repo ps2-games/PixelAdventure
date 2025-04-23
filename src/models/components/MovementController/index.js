@@ -47,6 +47,7 @@ export default class MovementController {
       affectedByGravity: options.affectedByGravity !== undefined ? options.affectedByGravity : true,
       jumpsRemaining: 2,
       maxJumps: 2,
+      isWallSliding: false
     };
 
     this.callbacks = {
@@ -59,8 +60,11 @@ export default class MovementController {
 
     this.tileMap = options.tileMap || [];
     this.entity = options.entity;
+  }
 
-    console.log(Object.entries((options.entity)))
+  checkWallCollision() {
+    const collisionDistance = 5;
+    const direction = this.state.facingDirection;
   }
 
   /**
@@ -90,8 +94,8 @@ export default class MovementController {
 
     const nearbyTiles = this.tileMap.filter(tile => {
       return (
-          Math.abs(tile.x - newX) < 100 &&
-          Math.abs(tile.y - newY) < 100
+        Math.abs(tile.x - newX) < 100 &&
+        Math.abs(tile.y - newY) < 100
       );
     });
 
@@ -107,10 +111,10 @@ export default class MovementController {
       };
 
       if (
-          bounds.left < tileBounds.right &&
-          bounds.right > tileBounds.left &&
-          bounds.top < tileBounds.bottom &&
-          bounds.bottom > tileBounds.top
+        bounds.left < tileBounds.right &&
+        bounds.right > tileBounds.left &&
+        bounds.top < tileBounds.bottom &&
+        bounds.bottom > tileBounds.top
       ) {
         if (tileProps.isPlatform) {
           if (this.velocity.y > 0) {
@@ -124,10 +128,10 @@ export default class MovementController {
               };
 
               if (
-                  testBounds.bottom >= tileBounds.top &&
-                  testBounds.bottom <= tileBounds.top + 10 &&
-                  testBounds.right > tileBounds.left + 5 &&
-                  testBounds.left < tileBounds.right - 5
+                testBounds.bottom >= tileBounds.top &&
+                testBounds.bottom <= tileBounds.top + 10 &&
+                testBounds.right > tileBounds.left + 5 &&
+                testBounds.left < tileBounds.right - 5
               ) {
                 return { tile, tileProps };
               }
@@ -139,13 +143,13 @@ export default class MovementController {
         let distance;
         if (direction === 'horizontal') {
           distance = Math.min(
-              Math.abs(bounds.right - tileBounds.left),
-              Math.abs(tileBounds.right - bounds.left)
+            Math.abs(bounds.right - tileBounds.left),
+            Math.abs(tileBounds.right - bounds.left)
           );
         } else {
           distance = Math.min(
-              Math.abs(bounds.bottom - tileBounds.top),
-              Math.abs(tileBounds.bottom - bounds.top)
+            Math.abs(bounds.bottom - tileBounds.top),
+            Math.abs(tileBounds.bottom - bounds.top)
           );
         }
 

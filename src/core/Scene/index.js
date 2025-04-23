@@ -14,7 +14,10 @@ export default class Scene {
             tiles: backgroundConfig ? backgroundConfig.tileMap : null,
             image: backgroundConfig ? new Image(`./assets/background/${backgroundConfig.color}.png`) : null,
             speed: backgroundConfig ? backgroundConfig.speed : 0,
-            offsetY: 0
+            offsetY: 0,
+            limitY: backgroundConfig ? backgroundConfig.limitY : 0,
+            resetY: backgroundConfig ? backgroundConfig.resetY : 0,
+            blanketMap: backgroundConfig ? backgroundConfig.blanketMap : null
         };
 
         this.init();
@@ -23,6 +26,10 @@ export default class Scene {
 
     init() {
         const { width, height } = Screen.getMode();
+
+        if (this.background.blanketMap) {
+            this.blanketTileMap = new TileMapRender(this.background.blanketMap);
+        }
 
         if (this.tileMapConfig) {
             this.tileMapRender = new TileMapRender(this.tileMapConfig);
@@ -37,9 +44,19 @@ export default class Scene {
     }
 
     drawBackgroundTile() {
-        if (this.background.tiles) {
-            for (const { tileX, tileY } of this.background.tiles) {
-                this.background.image.draw(tileX, tileY);
+        if (this.background.tiles && this.background.image) {
+            this.background.offsetY -= this.background.speed;
+
+            for (const tile of this.background.tiles) {
+                let yPos = tile.tileY + this.background.offsetY;
+
+                if (yPos < this.background.limitY) {
+                    const overflow = this.background.limitY - yPos;
+                    yPos = this.background.resetY - overflow;
+                    tile.tileY = yPos - this.background.offsetY;
+                }
+
+                this.background.image.draw(tile.tileX, yPos);
             }
         }
     }
@@ -54,5 +71,6 @@ export default class Scene {
         this.player.handleInput();
         this.player.update();
         this.player.draw();
+        this.blanketTileMap.render();
     }
 }

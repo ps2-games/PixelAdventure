@@ -95,6 +95,14 @@ export default class Player extends Entity {
         32,
         false
       ),
+      [PlayerAnimationsStates.WALL_JUMP]: new Animation(
+        "Sheets/ninjaFrog/Wall_Jump.png",
+        5,
+        100,
+        32,
+        32,
+        true
+      )
     };
 
     this.getBehavior("Animatable").initializeAnimations(animations);
