@@ -1,44 +1,57 @@
 import { TILE_SIZE } from "../../../core/Scene/constants/index.js";
 
-export default class TileMapRender {
-
+export default class OptimizedTileMapRender {
     constructor(tileMapConfig) {
-        this.tileMap = this.createTileMap(tileMapConfig);
+        this.tileset = new Image('./assets/tileset/Terrain16x16.png');
+        this.collisionTiles = []; // Array otimizado para colisão
+        this.renderBatches = this.createOptimizedBatches(tileMapConfig);
     }
 
-    createTileMap(tileMapConfig) {
-        const tileMap = [];
-        const tileset = new Image('./assets/tileset/Terrain16x16.png');
+    createOptimizedBatches(tileMapConfig) {
+        const batchMap = new Map();
 
-        if (tileMapConfig) {
-            for (const { tileColumn, tileRow, tileX, tileY, type } of tileMapConfig) {
-                tileMap.push({
-                    tileset,
-                    startx: tileColumn * TILE_SIZE,
-                    starty: tileRow * TILE_SIZE,
-                    endx: tileColumn * TILE_SIZE + TILE_SIZE,
-                    endy: tileRow * TILE_SIZE + TILE_SIZE,
-                    x: tileX,
-                    y: tileY,
-                    type,
-                    width: TILE_SIZE,
-                    height: TILE_SIZE,
+        tileMapConfig.forEach(tile => {
+            this.collisionTiles.push({
+                x: tile.tileX,
+                y: tile.tileY,
+                width: TILE_SIZE,
+                height: TILE_SIZE,
+                type: tile.type
+            });
+
+            const batchKey = `${tile.tileColumn}_${tile.tileRow}`;
+
+            if (!batchMap.has(batchKey)) {
+                batchMap.set(batchKey, {
+                    srcX: tile.tileColumn * TILE_SIZE,
+                    srcY: tile.tileRow * TILE_SIZE,
+                    positions: []
                 });
             }
-        }
 
-        return tileMap;
+            batchMap.get(batchKey).positions.push(tile.tileX, tile.tileY);
+        });
+
+        return Array.from(batchMap.values());
     }
 
     render() {
-        for (const tile of this.tileMap) {
-            tile.tileset.startx = tile.startx;
-            tile.tileset.starty = tile.starty;
-            tile.tileset.endx = tile.endx;
-            tile.tileset.endy = tile.endy;
-            tile.tileset.width = TILE_SIZE;
-            tile.tileset.height = TILE_SIZE;
-            tile.tileset.draw(tile.x, tile.y);
-        }
+        const ts = this.tileset;
+        const tileSize = TILE_SIZE;
+
+        ts.width = tileSize;
+        ts.height = tileSize;
+
+        this.renderBatches.forEach(batch => {
+            ts.startx = batch.srcX;
+            ts.starty = batch.srcY;
+            ts.endx = batch.srcX + tileSize;
+            ts.endy = batch.srcY + tileSize;
+
+            const positions = batch.positions;
+            for (let i = 0; i < positions.length; i += 2) {
+                ts.draw(positions[i], positions[i + 1]);
+            }
+        });
     }
 }

@@ -270,14 +270,14 @@ const floatCenterGroundPlatform = [
 const rightGround = [
     {
         tileColumn: 6,
-        tileRow: 2,
+        tileRow: 1,
         tileX: 416,
         tileY: 384,
         type: TileTypes.GROUND
     },
     ...Array.from({length: 7}, (_, i) => ({
         tileColumn: 7,
-        tileRow: 2,
+        tileRow: 1,
         tileX: 432 + i * TILE_SIZE,
         tileY: 384,
         type: TileTypes.GROUND
@@ -333,7 +333,14 @@ const ground = [
     ...leftGroundPilar,
     ...floatCenterGroundPlatform,
     ...rightGround,
-    ...rightBox
+    ...rightBox,
+    {
+        tileColumn: 12,
+        tileRow: 1,
+        tileX: 576,
+        tileY: 200,
+        type: TileTypes.GROUND
+    },
 ]
 
 export default ground;

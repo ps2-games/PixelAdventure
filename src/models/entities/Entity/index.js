@@ -4,24 +4,6 @@ export default class Entity {
     this.y = y;
     this.width = width;
     this.height = height;
-    this.canCollide = true;
-    this.behaviors = {};
-  }
-
-  addBehavior(behavior) {
-    this.behaviors[behavior.constructor.name] = behavior;
-  }
-
-  removeBehavior(behaviorName) {
-    delete this.behaviors[behaviorName];
-  }
-
-  getBehavior(behaviorName) {
-    return this.behaviors[behaviorName];
-  }
-
-  hasBehavior(behaviorName) {
-    return this.behaviors[behaviorName] !== undefined;
   }
 
   getBounds() {
@@ -34,10 +16,6 @@ export default class Entity {
   }
 
   isColliding(otherEntity) {
-    if (!this.canCollide || !otherEntity.canCollide) {
-      return false;
-    }
-
     const a = this.getBounds();
     const b = otherEntity.getBounds();
 
@@ -47,10 +25,6 @@ export default class Entity {
       a.top < b.bottom &&
       a.bottom > b.top
     );
-  }
-
-  onCollision(otherEntity) {
-    throw new Error("O método 'onCollision' deve ser implementado na subclasse.");
   }
 
   update() {

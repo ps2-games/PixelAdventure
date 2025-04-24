@@ -1,6 +1,6 @@
 import Player from "../../models/entities/Player/index.js";
-import FruitManager from "../../models/managers/Fruit/index.js";
 import TileMapRender from "../../models/renders/TileMap/index.js";
+import FruitManager from "../../models/entities/Fruits/manager/index.js";
 
 export default class Scene {
     constructor({ backgroundConfig, tileMapConfig, fruits, traps, initialPlayerPosition }) {
@@ -33,7 +33,7 @@ export default class Scene {
 
         if (this.tileMapConfig) {
             this.tileMapRender = new TileMapRender(this.tileMapConfig);
-            this.player = new Player(width, height, { initialX: this.initialPlayerPosition.x, initialY: this.initialPlayerPosition.y, tileMap: this.tileMapRender.tileMap });
+            this.player = new Player(width, height, { initialX: this.initialPlayerPosition.x, initialY: this.initialPlayerPosition.y, tileMap: this.tileMapRender.collisionTiles });
             this.fruitManager = new FruitManager(this.player);
         }
 

@@ -1,4 +1,4 @@
-import FruitUtils from "../../../../models/utils/Fruit/index.js";
+import FruitUtils from "../../../../models/entities/Fruits/utils/index.js";
 import { TILE_SIZE } from "../../../Scene/constants/index.js";
 
 const fruitsLevel1 = [
