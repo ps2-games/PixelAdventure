@@ -5,33 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="770ff987-77c1-46fd-859d-34cc4c494506" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/models/Animation/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/models/entities/AnimatableEntity/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/models/entities/Player/constants/animation.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/models/entities/Player/movement/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/models/entities/Player/state/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/Scene/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Scene/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/levels/level1/constants/fruits.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/levels/level1/constants/fruits.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/levels/level2/constants/ground.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/levels/level2/constants/ground.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/behaviors/Animatable/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/behaviors/Collectable/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/behaviors/Collector/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/behaviors/Controllable/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/behaviors/Movable/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/components/Animation/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/components/AnimationManager/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/components/MovementController/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/entities/Entity/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/entities/Entity/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/entities/Fruits/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/entities/Fruits/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/entities/Fruits/manager/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/entities/Fruits/manager/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/entities/Player/constants/movement.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/entities/Player/constants/movement.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/entities/Player/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/entities/Player/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/entities/Player/state/animations.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/managers/Fruit/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/renders/TileMap/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/renders/TileMap/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/utils/Fruit/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/entities/Fruits/utils/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +59,7 @@
       <option name="presentableId" value="Default" />
       <updated>1745448171519</updated>
       <workItem from="1745448173199" duration="147000" />
-      <workItem from="1745448794260" duration="11623000" />
+      <workItem from="1745448794260" duration="12116000" />
     </task>
     <servers />
   </component>

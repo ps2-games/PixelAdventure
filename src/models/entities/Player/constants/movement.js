@@ -7,5 +7,5 @@ export const PlayerMovementConstants = {
     LEFT: 'LEFT',
     RIGHT: 'RIGHT'
   },
-  WALL_SLIDE_SPEED: 2
+  WALL_SLIDE_SPEED: 1
 };

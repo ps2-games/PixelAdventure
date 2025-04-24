@@ -24,6 +24,12 @@ export default class Player extends AnimatableEntity {
       onDirectionChange: (direction) => {
         this.flipX = direction === PlayerMovementConstants.DIRECTION.LEFT;
       },
+      onWallSlideStart: () => {
+        this.setAnimation(PlayerAnimationsStates.WALL_JUMP)
+      },
+      onWallSlideEnd: () => {
+        this.setAnimation(PlayerAnimationsStates.IDLE)
+      },
     })
 
     this.pads = Pads.get();
@@ -43,8 +49,11 @@ export default class Player extends AnimatableEntity {
       newState = PlayerAnimationsStates.DOUBLE_JUMP;
     } else if (velocity.y < 0) {
       newState = PlayerAnimationsStates.JUMP;
-    } else if (velocity.y > 0) {
+    } else if (velocity.y > 0 && !this.movementController.state.isWallSliding) {
       newState = PlayerAnimationsStates.FALL;
+    }
+    else if (velocity.y > 0 && this.movementController.state.isWallSliding) {
+      newState = PlayerAnimationsStates.WALL_JUMP;
     } else if (velocity.x !== 0) {
       newState = PlayerAnimationsStates.RUN;
     }
@@ -103,6 +112,13 @@ export default class Player extends AnimatableEntity {
     const { frameWidth, frameHeight, image } = this.getCurrentAnimation();
     const frameX = this.getCurrentFrame() * frameWidth;
     const position = this.movementController.getPosition();
+    const isWallSliding = this.movementController.state.isWallSliding;
+
+    const xOffset = isWallSliding ? (this.flipX ? -5 : 5) : 0;
+
+    const drawX = this.flipX ?
+      position.x + frameWidth + xOffset :
+      position.x + xOffset;
 
     image.startx = frameX;
     image.starty = 0;
@@ -113,9 +129,9 @@ export default class Player extends AnimatableEntity {
     image.height = frameHeight;
 
     if (this.flipX) {
-      image.draw(position.x + frameWidth, position.y);
+      image.draw(drawX, position.y);
     } else {
-      image.draw(position.x, position.y);
+      image.draw(drawX, position.y);
     }
   }
 }

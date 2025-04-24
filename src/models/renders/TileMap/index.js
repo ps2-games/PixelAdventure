@@ -1,9 +1,9 @@
 import { TILE_SIZE } from "../../../core/Scene/constants/index.js";
 
-export default class OptimizedTileMapRender {
+export default class TileMapRender {
     constructor(tileMapConfig) {
         this.tileset = new Image('./assets/tileset/Terrain16x16.png');
-        this.collisionTiles = []; // Array otimizado para colisão
+        this.collisionTiles = [];
         this.renderBatches = this.createOptimizedBatches(tileMapConfig);
     }
 
