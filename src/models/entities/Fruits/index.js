@@ -7,35 +7,35 @@ export default class Fruit extends AnimatableEntity {
   constructor(fruit, xPosition, yPosition, collectedSound) {
     super(xPosition, yPosition, 32, 32, {
       [FruitsAnimationsStates.IDLE]: new Animation(
-          `Sheets/fruits/${fruit}.png`,
-          11,
-          50,
-          32,
-          32,
-          true
+        `Sheets/fruits/${fruit}.png`,
+        11,
+        50,
+        32,
+        32,
+        true
       ),
       [FruitsAnimationsStates.COLLECTED]: new Animation(
-          `Sheets/fruits/Collected.png`,
-          6,
-          50,
-          32,
-          32,
-          false
+        `Sheets/fruits/Collected.png`,
+        6,
+        50,
+        32,
+        32,
+        false
       ),
     });
     this.isCollected = false;
     this.collectedSound = collectedSound
   }
 
-    collect(scene) {
-      if (this.isCollected) return;
-      Sound.play(this.collectedSound, scene.fruitSlot);
+  collect(scene) {
+    if (this.isCollected) return;
+    Sound.play(this.collectedSound, scene.fruitSlot);
 
-      scene.fruitSlot = (scene.fruitSlot + 1) & (scene.fruitSlotSize - 1);
+    scene.fruitSlot = (scene.fruitSlot + 1) & (scene.fruitSlotSize - 1);
 
-      this.setAnimation(FruitsAnimationsStates.COLLECTED);
-      this.isCollected = true;
-    }
+    this.setAnimation(FruitsAnimationsStates.COLLECTED);
+    this.isCollected = true;
+  }
 
 
   update(collector, scene) {

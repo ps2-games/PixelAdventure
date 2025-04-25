@@ -6,7 +6,8 @@ export const PlayerAnimationsStates = {
     JUMP: 'JUMP',
     FALL: 'FALL',
     DOUBLE_JUMP: 'DOUBLE_JUMP',
-    WALL_JUMP: 'WALL_JUMP'
+    WALL_JUMP: 'WALL_JUMP',
+    HIT: "HIT",
 };
 
 const PLAYER_ANIMATIONS = {
@@ -57,7 +58,15 @@ const PLAYER_ANIMATIONS = {
         32,
         32,
         true
+    ),
+    [PlayerAnimationsStates.HIT]: new Animation(
+        "Sheets/ninjaFrog/Hit.png",
+        7,
+        100,
+        32,
+        32,
+        false
     )
 }
 
-export  default  PLAYER_ANIMATIONS
+export default PLAYER_ANIMATIONS

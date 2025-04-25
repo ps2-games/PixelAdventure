@@ -7,28 +7,39 @@ export default class Player extends AnimatableEntity {
   constructor(canvasWidth, canvasHeight, options = {}) {
     super(options.initialX || 0, options.initialY || 0, 32, 32, PLAYER_ANIMATIONS);
 
+    this.deathRotation = 0;
+    this.deathRotationSpeed = 0;
+    this.deathVelocity = { x: 0, y: 0 };
+    this.isDying = false;
+
     this.movementController = new PlayerMovementController({
       initialX: options.initialX || 0,
       initialY: options.initialY || 0,
       entity: this,
       tileMap: options.tileMap,
-      onJump: () => this.setAnimation(PlayerAnimationsStates.JUMP),
-      onDoubleJump: () => this.setAnimation(PlayerAnimationsStates.DOUBLE_JUMP),
-      onLand: (velocity) => {
-        if (velocity.x !== 0) {
+      onJump: (canMove) => canMove && this.setAnimation(PlayerAnimationsStates.JUMP),
+      onDoubleJump: (canMove) => canMove && this.setAnimation(PlayerAnimationsStates.DOUBLE_JUMP),
+      onLand: (velocity, canMove) => {
+        if (velocity.x !== 0 && canMove) {
           this.setAnimation(PlayerAnimationsStates.RUN);
         } else {
           this.setAnimation(PlayerAnimationsStates.IDLE);
         }
       },
-      onDirectionChange: (direction) => {
-        this.flipX = direction === PlayerMovementConstants.DIRECTION.LEFT;
+      onDirectionChange: (direction, canMove) => {
+        if (canMove) {
+          this.flipX = direction === PlayerMovementConstants.DIRECTION.LEFT;
+        }
       },
-      onWallSlideStart: () => {
-        this.setAnimation(PlayerAnimationsStates.WALL_JUMP)
+      onWallSlideStart: (canMove) => {
+        if (canMove) {
+          this.setAnimation(PlayerAnimationsStates.WALL_JUMP)
+        }
       },
-      onWallSlideEnd: () => {
-        this.setAnimation(PlayerAnimationsStates.IDLE)
+      onWallSlideEnd: (canMove) => {
+        if (canMove) {
+          this.setAnimation(PlayerAnimationsStates.IDLE)
+        }
       },
     })
 
@@ -45,17 +56,21 @@ export default class Player extends AnimatableEntity {
 
     let newState = PlayerAnimationsStates.IDLE;
 
-    if (velocity.y < 0 && jumpsRemaining === 0) {
-      newState = PlayerAnimationsStates.DOUBLE_JUMP;
-    } else if (velocity.y < 0) {
-      newState = PlayerAnimationsStates.JUMP;
-    } else if (velocity.y > 0 && !this.movementController.state.isWallSliding) {
-      newState = PlayerAnimationsStates.FALL;
+    if (this.movementController.state.canMove) {
+      if (velocity.y < 0 && jumpsRemaining === 0) {
+        newState = PlayerAnimationsStates.DOUBLE_JUMP;
+      } else if (velocity.y < 0) {
+        newState = PlayerAnimationsStates.JUMP;
+      } else if (velocity.y > 0 && !this.movementController.state.isWallSliding) {
+        newState = PlayerAnimationsStates.FALL;
+      } else if (velocity.y > 0 && this.movementController.state.isWallSliding) {
+        newState = PlayerAnimationsStates.WALL_JUMP;
+      } else if (velocity.x !== 0) {
+        newState = PlayerAnimationsStates.RUN;
+      }
     }
-    else if (velocity.y > 0 && this.movementController.state.isWallSliding) {
-      newState = PlayerAnimationsStates.WALL_JUMP;
-    } else if (velocity.x !== 0) {
-      newState = PlayerAnimationsStates.RUN;
+    else {
+      newState = PlayerAnimationsStates.HIT;
     }
 
     if (currentState !== newState) {
@@ -89,7 +104,20 @@ export default class Player extends AnimatableEntity {
   }
 
   update() {
-    this.handleInput();
+    if (!this.isDying) {
+      this.handleInput();
+    } else {
+      this.deathRotation += this.deathRotationSpeed;
+
+      const position = this.movementController.getPosition();
+      this.movementController.setPosition(
+        position.x + this.deathVelocity.x,
+        position.y + this.deathVelocity.y
+      );
+
+      this.deathVelocity.y += 0.05;
+    }
+
     this.movementController.update();
     this.handleAnimation();
     this.draw();
@@ -125,6 +153,12 @@ export default class Player extends AnimatableEntity {
     image.endx = frameX + frameWidth;
     image.endy = frameHeight;
 
+    if (this.isDying) {
+      image.angle = this.deathRotation;
+    } else {
+      image.angle = 0;
+    }
+
     image.width = this.flipX ? -Math.abs(frameWidth) : Math.abs(frameWidth);
     image.height = frameHeight;
 
@@ -133,5 +167,19 @@ export default class Player extends AnimatableEntity {
     } else {
       image.draw(drawX, position.y);
     }
+  }
+
+  die() {
+    if (this.isDying) return;
+
+    this.isDying = true;
+    this.setAnimation(PlayerAnimationsStates.HIT);
+    this.movementController.state.canMove = false;
+
+    const direction = this.movementController.state.facingDirection === 'RIGHT' ? -1 : 1;
+    this.deathVelocity.x = direction * 2;
+    this.deathVelocity.y = -4;
+
+    this.deathRotationSpeed = (Math.random() > 0.5 ? 1 : -1) * 0.05;
   }
 }

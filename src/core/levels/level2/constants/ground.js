@@ -1,9 +1,9 @@
-import {TILE_SIZE} from "../../../Scene/constants/index.js";
+import { TILE_SIZE } from "../../../Scene/constants/index.js";
 import TileTypes from "../../../../@types/tile-types.js";
 
 
 const leftGroundPilar = [
-    ...Array.from({ length: 17 }, (_, i) => ({
+    ...Array.from({ length: 16 }, (_, i) => ({
         tileColumn: 6,
         tileRow: 1,
         tileX: 108,
@@ -14,10 +14,10 @@ const leftGroundPilar = [
         tileColumn: 6,
         tileRow: 0,
         tileX: 108,
-        tileY: 112,
+        tileY: 128,
         type: TileTypes.GROUND
     },
-    ...Array.from({ length: 17 }, (_, i) => ({
+    ...Array.from({ length: 16 }, (_, i) => ({
         tileColumn: 8,
         tileRow: 1,
         tileX: 156,
@@ -28,7 +28,7 @@ const leftGroundPilar = [
         tileColumn: 8,
         tileRow: 0,
         tileX: 156,
-        tileY: 112,
+        tileY: 128,
         type: TileTypes.GROUND
     },
     ...Array.from({ length: 9 }, (_, i) => ({
@@ -73,14 +73,14 @@ const leftGroundPilar = [
         tileY: 224,
         type: TileTypes.GROUND
     },
-    ...Array.from({ length: 6 }, (_, i) => ({
+    ...Array.from({ length: 5 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 140,
         tileY: 208 - i * TILE_SIZE,
         type: TileTypes.GROUND
     })),
-    ...Array.from({ length: 6 }, (_, i) => ({
+    ...Array.from({ length: 5 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 124,
@@ -91,7 +91,7 @@ const leftGroundPilar = [
         tileColumn: 7,
         tileRow: 0,
         tileX: 124 + i * TILE_SIZE,
-        tileY: 112,
+        tileY: 128,
         type: TileTypes.GROUND
     })),
 ]
@@ -143,7 +143,7 @@ const floatCenterGroundPlatform = [
         tileColumn: 6,
         tileRow: 1,
         tileX: 256,
-        tileY: 264 ,
+        tileY: 264,
         type: TileTypes.GROUND
     },
     {
@@ -174,28 +174,28 @@ const floatCenterGroundPlatform = [
         tileY: 200,
         type: TileTypes.GROUND
     },
-    ...Array.from( {length: 4 }, (_, i) => ({
+    ...Array.from({ length: 4 }, (_, i) => ({
         tileColumn: 8,
         tileRow: 1,
         tileX: 384,
         tileY: 216 + i * TILE_SIZE,
         type: TileTypes.GROUND
     })),
-    ...Array.from( {length: 7 }, (_, i) => ({
+    ...Array.from({ length: 7 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 0,
         tileX: 272 + i * TILE_SIZE,
         tileY: 200,
         type: TileTypes.GROUND
     })),
-    ...Array.from( {length: 2 }, (_, i) => ({
+    ...Array.from({ length: 2 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 272,
         tileY: 216 + i * TILE_SIZE,
         type: TileTypes.GROUND
     })),
-    ...Array.from( {length: 2 }, (_, i) => ({
+    ...Array.from({ length: 2 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 288,
@@ -230,35 +230,35 @@ const floatCenterGroundPlatform = [
         tileY: 264,
         type: TileTypes.GROUND
     },
-    ...Array.from( {length: 4 }, (_, i) => ({
+    ...Array.from({ length: 4 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 304,
         tileY: 216 + i * TILE_SIZE,
         type: TileTypes.GROUND
     })),
-    ...Array.from( {length: 4 }, (_, i) => ({
+    ...Array.from({ length: 4 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 320,
         tileY: 216 + i * TILE_SIZE,
         type: TileTypes.GROUND
     })),
-    ...Array.from( {length: 4 }, (_, i) => ({
+    ...Array.from({ length: 4 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 336,
         tileY: 216 + i * TILE_SIZE,
         type: TileTypes.GROUND
     })),
-    ...Array.from( {length: 4 }, (_, i) => ({
+    ...Array.from({ length: 4 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 352,
         tileY: 216 + i * TILE_SIZE,
         type: TileTypes.GROUND
     })),
-    ...Array.from( {length: 4 }, (_, i) => ({
+    ...Array.from({ length: 4 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 368,
@@ -275,7 +275,7 @@ const rightGround = [
         tileY: 384,
         type: TileTypes.GROUND
     },
-    ...Array.from({length: 7}, (_, i) => ({
+    ...Array.from({ length: 7 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 1,
         tileX: 432 + i * TILE_SIZE,
@@ -289,7 +289,7 @@ const rightGround = [
         tileY: 368,
         type: TileTypes.GROUND
     },
-    ...Array.from({length: 7}, (_, i) => ({
+    ...Array.from({ length: 7 }, (_, i) => ({
         tileColumn: 7,
         tileRow: 0,
         tileX: 432 + i * TILE_SIZE,

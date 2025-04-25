@@ -37,7 +37,8 @@ export default class PlayerMovementController {
             affectedByGravity: options.affectedByGravity !== undefined ? options.affectedByGravity : true,
             jumpsRemaining: 2,
             maxJumps: 2,
-            isWallSliding: false
+            isWallSliding: false,
+            canMove: true,
         };
 
         this.callbacks = {
@@ -77,6 +78,7 @@ export default class PlayerMovementController {
     }
 
     checkWallCollision() {
+
         if (this.state.isGrounded) {
             if (this.state.isWallSliding) {
                 this.state.isWallSliding = false;
@@ -132,9 +134,9 @@ export default class PlayerMovementController {
         this.state.isWallSliding = wallCollision;
 
         if (wallCollision && !wasWallSliding && this.callbacks.onWallSlideStart) {
-            this.callbacks.onWallSlideStart();
+            this.callbacks.onWallSlideStart(this.state.canMove);
         } else if (!wallCollision && wasWallSliding && this.callbacks.onWallSlideEnd) {
-            this.callbacks.onWallSlideEnd();
+            this.callbacks.onWallSlideEnd(this.state.canMove);
         }
 
         return wallCollision;
@@ -145,15 +147,20 @@ export default class PlayerMovementController {
             this.applyGravity(deltaTime);
         }
 
-        this.checkWallCollision();
+        if (!this.state.canMove) {
+            this.velocity.x = 0;
+            this.updatePosition(deltaTime);
+            return;
+        }
 
+        this.checkWallCollision();
         if (this.state.isWallSliding) {
             this.velocity.y = Math.min(this.velocity.y, PlayerMovementConstants.WALL_SLIDE_SPEED);
         }
-
         this.updatePosition(deltaTime);
         this.checkBoundaryCollisions();
     }
+
 
     checkTileCollision(newX, newY, direction) {
         const entityRight = newX + this.entity.width;
@@ -261,61 +268,63 @@ export default class PlayerMovementController {
         let newX = this.position.x + this.velocity.x * deltaTime;
         let newY = this.position.y + this.velocity.y * deltaTime;
 
-        if (this.velocity.y !== 0) {
-            const vCollision = this.checkTileCollision(this.position.x, newY, 'vertical');
+        if (this.state.canMove) {
+            if (this.velocity.y !== 0) {
+                const vCollision = this.checkTileCollision(this.position.x, newY, 'vertical');
 
-            if (vCollision) {
-                if (vCollision.tileProps.isPlatform) {
-                    if (this.velocity.y > 0 && this.position.y + this.entity.height <= vCollision.tile.y) {
-                        newY = vCollision.tile.y - this.entity.height;
-                        this.velocity.y = 0;
+                if (vCollision) {
+                    if (vCollision.tileProps.isPlatform) {
+                        if (this.velocity.y > 0 && this.position.y + this.entity.height <= vCollision.tile.y) {
+                            newY = vCollision.tile.y - this.entity.height;
+                            this.velocity.y = 0;
 
-                        const justLanded = !this.state.isGrounded;
-                        this.state.isGrounded = true;
-                        this.state.jumpsRemaining = this.state.maxJumps;
+                            const justLanded = !this.state.isGrounded;
+                            this.state.isGrounded = true;
+                            this.state.jumpsRemaining = this.state.maxJumps;
 
-                        if (justLanded && this.callbacks.onLand) {
-                            this.callbacks.onLand(this.velocity);
+                            if (justLanded && this.callbacks.onLand) {
+                                this.callbacks.onLand(this.velocity, this.state.canMove);
+                            }
+                        }
+                    } else if (vCollision.tileProps.collidable) {
+                        if (this.velocity.y > 0) {
+                            newY = vCollision.tile.y - this.entity.height;
+                            this.velocity.y = 0;
+
+                            const justLanded = !this.state.isGrounded;
+                            this.state.isGrounded = true;
+                            this.state.jumpsRemaining = this.state.maxJumps;
+                            this.state.isWallSliding = false;
+
+                            if (justLanded && this.callbacks.onLand) {
+                                this.callbacks.onLand(this.velocity);
+                            }
+                        } else if (this.velocity.y < 0) {
+                            newY = vCollision.tile.y + vCollision.tile.height;
+                            this.velocity.y = 0;
                         }
                     }
-                } else if (vCollision.tileProps.collidable) {
-                    if (this.velocity.y > 0) {
-                        newY = vCollision.tile.y - this.entity.height;
-                        this.velocity.y = 0;
-
-                        const justLanded = !this.state.isGrounded;
-                        this.state.isGrounded = true;
-                        this.state.jumpsRemaining = this.state.maxJumps;
-                        this.state.isWallSliding = false;
-
-                        if (justLanded && this.callbacks.onLand) {
-                            this.callbacks.onLand(this.velocity);
-                        }
-                    } else if (this.velocity.y < 0) {
-                        newY = vCollision.tile.y + vCollision.tile.height;
-                        this.velocity.y = 0;
-                    }
+                } else {
+                    this.state.isGrounded = false;
                 }
-            } else {
-                this.state.isGrounded = false;
             }
-        }
 
-        if (this.velocity.x !== 0) {
-            const hCollision = this.checkTileCollision(newX, this.position.y, 'horizontal');
+            if (this.velocity.x !== 0) {
+                const hCollision = this.checkTileCollision(newX, this.position.y, 'horizontal');
 
-            if (hCollision && hCollision.tileProps.collidable && !hCollision.tileProps.isPlatform) {
-                if (this.velocity.x > 0) {
-                    newX = hCollision.tile.x - this.entity.width;
-                } else if (this.velocity.x < 0) {
-                    newX = hCollision.tile.x + hCollision.tile.width;
-                }
-                this.velocity.x = 0;
+                if (hCollision && hCollision.tileProps.collidable && !hCollision.tileProps.isPlatform) {
+                    if (this.velocity.x > 0) {
+                        newX = hCollision.tile.x - this.entity.width;
+                    } else if (this.velocity.x < 0) {
+                        newX = hCollision.tile.x + hCollision.tile.width;
+                    }
+                    this.velocity.x = 0;
 
-                if (!this.state.isGrounded && !this.state.isWallSliding) {
-                    this.state.isWallSliding = true;
-                    if (this.callbacks.onWallSlideStart) {
-                        this.callbacks.onWallSlideStart();
+                    if (!this.state.isGrounded && !this.state.isWallSliding) {
+                        this.state.isWallSliding = true;
+                        if (this.callbacks.onWallSlideStart) {
+                            this.callbacks.onWallSlideStart();
+                        }
                     }
                 }
             }
@@ -325,7 +334,7 @@ export default class PlayerMovementController {
         this.position.y = newY;
 
         if (this.callbacks.onMove) {
-            this.callbacks.onMove(this.position.x, this.position.y);
+            this.callbacks.onMove(this.position.x, this.position.y, this.state.canMove);
         }
     }
 
@@ -368,7 +377,7 @@ export default class PlayerMovementController {
         this.state.facingDirection = 'RIGHT';
 
         if (prevDirection !== this.state.facingDirection && this.callbacks.onDirectionChange) {
-            this.callbacks.onDirectionChange(this.state.facingDirection);
+            this.callbacks.onDirectionChange(this.state.facingDirection, this.state.canMove);
         }
     }
 
@@ -378,7 +387,7 @@ export default class PlayerMovementController {
         this.state.facingDirection = 'LEFT';
 
         if (prevDirection !== this.state.facingDirection && this.callbacks.onDirectionChange) {
-            this.callbacks.onDirectionChange(this.state.facingDirection);
+            this.callbacks.onDirectionChange(this.state.facingDirection, this.state.canMove);
         }
     }
 
@@ -387,6 +396,11 @@ export default class PlayerMovementController {
     }
 
     jump(multiplier = 1) {
+
+        if (!this.state.canMove) {
+            return;
+        }
+
         if (this.state.isGrounded || this.state.jumpsRemaining > 0) {
             this.velocity.y = this.physics.jumpStrength * multiplier;
             this.state.isJumping = true;
@@ -394,10 +408,10 @@ export default class PlayerMovementController {
             this.state.isWallSliding = false;
 
             if (!this.state.isGrounded && this.state.jumpsRemaining === 1 && this.callbacks.onDoubleJump) {
-                this.callbacks.onDoubleJump();
+                this.callbacks.onDoubleJump(this.state.canMove);
             }
             else if (this.callbacks.onJump) {
-                this.callbacks.onJump();
+                this.callbacks.onJump(this.state.canMove);
             }
 
             this.state.jumpsRemaining--;
