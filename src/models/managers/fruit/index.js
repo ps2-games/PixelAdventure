@@ -1,4 +1,4 @@
-import Fruit from "../index.js";
+import Fruit from "../../entities/Fruits/index.js";
 
 export default class FruitManager {
     constructor(collector) {

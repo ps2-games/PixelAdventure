@@ -59,6 +59,15 @@ export default class Fruit extends AnimatableEntity {
     );
   }
 
+  getBounds() {
+    return {
+      left: this.x + 8,
+      top: this.y + 8,
+      right: this.x + (this.width - 8),
+      bottom: this.y + (this.height - 8)
+    };
+  }
+
   draw() {
 
     const { frameWidth, frameHeight, image } = this.getCurrentAnimation();

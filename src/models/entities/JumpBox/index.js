@@ -1,25 +1,18 @@
 import Entity from "../Entity/index.js";
 
-export default class SpikeTrap extends Entity {
-    constructor(x, y, player) {
-        super(x, y, 16, 16);
-        this.image = new Image("./assets/Sheets/traps/Spikes/idle.png");
+export default class JumpBoxTrap extends Entity {
+    constructor(x, y,) {
+        this.image = new Image("./assets/Sheets/objects/Box1/idle.png");
         this.x = x;
         this.y = y;
         this.player = player;
         this.isActive = true;
     }
 
-
     draw() {
         this.image.draw(this.x, this.y);
     }
 
-    killPlayer() {
-        if (this.player && this.isColliding(this.player)) {
-            this.player.die();
-        }
-    }
 
     getBounds() {
         return {
@@ -32,6 +25,5 @@ export default class SpikeTrap extends Entity {
 
     update() {
         this.draw()
-        this.killPlayer()
     }
 }

@@ -1,7 +1,7 @@
 import Player from "../../models/entities/Player/index.js";
 import TileMapRender from "../../models/renders/TileMap/index.js";
-import FruitManager from "../../models/entities/Fruits/manager/index.js";
-import SpikeTrap from "../../models/entities/Spike/index.js";
+import FruitManager from "../../models/managers/fruit/index.js";
+import TrapManager from "../../models/managers/trap/index.js";
 
 export default class Scene {
     constructor({ backgroundConfig, tileMapConfig, fruits, traps, initialPlayerPosition }) {
@@ -36,11 +36,15 @@ export default class Scene {
             this.tileMapRender = new TileMapRender(this.tileMapConfig);
             this.player = new Player(width, height, { initialX: this.initialPlayerPosition.x, initialY: this.initialPlayerPosition.y, tileMap: this.tileMapRender.collisionTiles });
             this.fruitManager = new FruitManager(this.player);
-            this.spikeTrap = new SpikeTrap(156, 112, this.player);
+            this.trapManager = new TrapManager()
         }
 
         if (this.fruits) {
             this.fruits.forEach((fruit) => this.fruitManager.addFruit(fruit.type, fruit.x, fruit.y))
+        }
+
+        if (this.traps) {
+            this.traps.forEach((trap) => this.trapManager.addTrap(trap.type, trap.x, trap.y))
         }
 
     }
@@ -69,9 +73,7 @@ export default class Scene {
         this.tileMapRender.render();
         this.fruitManager.update();
         this.player.update();
-
-        this.spikeTrap.draw();
-        this.spikeTrap.killPlayer();
+        this.trapManager.update();
 
         if (this.blanketTileMap) {
             this.blanketTileMap.render();

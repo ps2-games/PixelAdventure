@@ -44,7 +44,6 @@ export default class Player extends AnimatableEntity {
     })
 
     this.pads = Pads.get();
-
   }
 
 
@@ -101,6 +100,7 @@ export default class Player extends AnimatableEntity {
     if (this.pads.justPressed(Pads.UP)) {
       this.movementController.jump();
     }
+    // this.drawCollisionBox(this.movementController.position.x, this.movementController.position.y)
   }
 
   update() {
@@ -129,8 +129,8 @@ export default class Player extends AnimatableEntity {
 
     return {
       left: position.x,
-      top: position.y,
-      right: position.x + frameWidth,
+      top: position.y + 6,
+      right: position.x + 28,
       bottom: position.y + frameHeight,
     };
   }

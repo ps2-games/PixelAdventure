@@ -4,6 +4,8 @@ export default class Entity {
     this.y = y;
     this.width = width;
     this.height = height;
+
+    this.debugColor = Color.new(255, 0, 0, 50);
   }
 
   getBounds() {
@@ -33,5 +35,16 @@ export default class Entity {
 
   draw() {
     throw new Error("O método 'draw' deve ser implementado na subclasse.");
+  }
+
+  drawCollisionBox(x = this.x, y = this.y) {
+    const bounds = this.getBounds();
+    Draw.quad(
+      bounds.left, bounds.top,
+      bounds.right, bounds.top,
+      bounds.right, bounds.bottom,
+      bounds.left, bounds.bottom,
+      this.debugColor
+    );
   }
 }
