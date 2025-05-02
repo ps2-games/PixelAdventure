@@ -2,6 +2,7 @@ import TrapTypes from "../../../@types/trap-types.js";
 import BoxTrap from "../../entities/Box/index.js";
 import SawTrap from "../../entities/Saw/index.js";
 import SpikeTrap from "../../entities/Spike/index.js";
+import SpikeHead from "../../entities/SpikeHead/index.js";
 
 export default class TrapManager {
     constructor(player) {
@@ -16,6 +17,7 @@ export default class TrapManager {
                 trap = new SpikeTrap(x, y, this.player);
                 break;
             case TrapTypes.SPIKE_HEAD:
+                trap = new SpikeHead(x, y, this.player);
                 break;
             case TrapTypes.BOX:
                 trap = new BoxTrap(x, y, this.player);

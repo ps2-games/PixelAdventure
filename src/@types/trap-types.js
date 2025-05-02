@@ -1,6 +1,6 @@
 const TrapTypes = {
     SPIKE: 'spike',
-    SPIKE_HEAD: 'spikeHead',
+    SPIKE_HEAD: 'spike_head',
     BOX: 'box',
     SAW: 'saw'
 };

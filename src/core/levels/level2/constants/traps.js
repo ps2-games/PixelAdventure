@@ -30,6 +30,11 @@ const traps = [
             speed: 1.5
         }
     },
+    {
+        type: TrapTypes.SPIKE_HEAD,
+        x: 452,
+        y: 220,
+    },
 ]
 
 export default traps;
