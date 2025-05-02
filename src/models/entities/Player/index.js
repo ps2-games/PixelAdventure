@@ -11,6 +11,7 @@ export default class Player extends AnimatableEntity {
     this.deathRotationSpeed = 0;
     this.deathVelocity = { x: 0, y: 0 };
     this.isDying = false;
+    this.isDeathAnimationComplete = false;
 
     this.movementController = new PlayerMovementController({
       initialX: options.initialX || 0,
@@ -44,10 +45,17 @@ export default class Player extends AnimatableEntity {
     })
 
     this.pads = Pads.get();
+
+    this.animations[PlayerAnimationsStates.HIT].onAnimationEnd = () => {
+      this.isDeathAnimationComplete = true;
+    };
   }
 
 
   handleAnimation() {
+    if (this.isDying && this.isDeathAnimationComplete) {
+      return;
+    }
 
     const velocity = this.movementController.getVelocity();
     const jumpsRemaining = this.movementController.state.jumpsRemaining;
@@ -80,7 +88,6 @@ export default class Player extends AnimatableEntity {
   }
 
   handleInput() {
-
     this.pads.update();
 
     let moving = false;
@@ -106,6 +113,7 @@ export default class Player extends AnimatableEntity {
   update() {
     if (!this.isDying) {
       this.handleInput();
+      this.movementController.update();
     } else {
       this.deathRotation += this.deathRotationSpeed;
 
@@ -115,17 +123,15 @@ export default class Player extends AnimatableEntity {
         position.y + this.deathVelocity.y
       );
 
-      this.deathVelocity.y += 0.05;
+      this.deathVelocity.y += 0.5;
     }
-
-    this.movementController.update();
     this.handleAnimation();
     this.draw();
   }
 
   getBounds() {
     const position = this.movementController.getPosition();
-    const { frameWidth, frameHeight } = this.getCurrentAnimation()
+    const { frameHeight } = this.getCurrentAnimation()
 
     return {
       left: position.x,
@@ -136,7 +142,6 @@ export default class Player extends AnimatableEntity {
   }
 
   draw() {
-
     const { frameWidth, frameHeight, image } = this.getCurrentAnimation();
     const frameX = this.getCurrentFrame() * frameWidth;
     const position = this.movementController.getPosition();
@@ -162,17 +167,14 @@ export default class Player extends AnimatableEntity {
     image.width = this.flipX ? -Math.abs(frameWidth) : Math.abs(frameWidth);
     image.height = frameHeight;
 
-    if (this.flipX) {
-      image.draw(drawX, position.y);
-    } else {
-      image.draw(drawX, position.y);
-    }
+    image.draw(drawX, position.y);
   }
 
   die() {
     if (this.isDying) return;
 
     this.isDying = true;
+    this.isDeathAnimationComplete = false;
     this.setAnimation(PlayerAnimationsStates.HIT);
     this.movementController.state.canMove = false;
 
@@ -181,5 +183,10 @@ export default class Player extends AnimatableEntity {
     this.deathVelocity.y = -4;
 
     this.deathRotationSpeed = (Math.random() > 0.5 ? 1 : -1) * 0.05;
+  }
+
+  shouldRemove() {
+    const position = this.movementController.getPosition();
+    return this.isDying && ((position.y > 1000 || Math.abs(position.x) > 1000));
   }
 }

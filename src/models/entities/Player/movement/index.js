@@ -395,6 +395,22 @@ export default class PlayerMovementController {
         this.velocity.x = 0;
     }
 
+    forcedJump(multiplier = 1) {
+        if (!this.state.canMove) {
+            return;
+        }
+
+        this.velocity.y = this.physics.jumpStrength * multiplier;
+        this.state.isJumping = true;
+        this.state.isGrounded = false;
+        this.state.isWallSliding = false;
+
+        this.callbacks.onJump(this.state.canMove);
+        this.state.jumpsRemaining = 2;
+
+        return true;
+    }
+
     jump(multiplier = 1) {
 
         if (!this.state.canMove) {

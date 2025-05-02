@@ -36,7 +36,7 @@ export default class Scene {
             this.tileMapRender = new TileMapRender(this.tileMapConfig);
             this.player = new Player(width, height, { initialX: this.initialPlayerPosition.x, initialY: this.initialPlayerPosition.y, tileMap: this.tileMapRender.collisionTiles });
             this.fruitManager = new FruitManager(this.player);
-            this.trapManager = new TrapManager()
+            this.trapManager = new TrapManager(this.player);
         }
 
         if (this.fruits) {
@@ -72,8 +72,16 @@ export default class Scene {
         this.drawBackgroundTile();
         this.tileMapRender.render();
         this.fruitManager.update();
-        this.player.update();
         this.trapManager.update();
+
+
+        if (this.player && this.player.shouldRemove()) {
+            this.player = null;
+        }
+
+        if (this.player) {
+            this.player.update();
+        }
 
         if (this.blanketTileMap) {
             this.blanketTileMap.render();

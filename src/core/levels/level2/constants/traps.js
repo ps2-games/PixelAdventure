@@ -10,7 +10,17 @@ const traps = [
         type: TrapTypes.SPIKE,
         x: 326,
         y: 385,
-    }
+    },
+    {
+        type: TrapTypes.BOX,
+        x: 440,
+        y: 166
+    },
+    {
+        type: TrapTypes.BOX,
+        x: 504,
+        y: 166
+    },
 ]
 
 export default traps;

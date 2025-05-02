@@ -1,4 +1,5 @@
 import TrapTypes from "../../../@types/trap-types.js";
+import BoxTrap from "../../entities/Box/index.js";
 import SpikeTrap from "../../entities/Spike/index.js";
 
 export default class TrapManager {
@@ -15,7 +16,8 @@ export default class TrapManager {
                 break;
             case TrapTypes.SPIKE_HEAD:
                 break;
-            case TrapTypes.JUMP_BOX:
+            case TrapTypes.BOX:
+                trap = new BoxTrap(x, y, this.player)
                 break;
             default:
                 throw new Error(`Tipo de armadilha desconhecido: ${type}`);
