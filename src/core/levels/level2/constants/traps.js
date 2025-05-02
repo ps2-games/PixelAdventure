@@ -21,6 +21,15 @@ const traps = [
         x: 504,
         y: 166
     },
+    {
+        type: TrapTypes.SAW,
+        x: 380,
+        y: 276,
+        options: {
+            endX: 238,
+            speed: 1.5
+        }
+    },
 ]
 
 export default traps;

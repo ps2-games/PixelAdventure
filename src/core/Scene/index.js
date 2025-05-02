@@ -44,7 +44,7 @@ export default class Scene {
         }
 
         if (this.traps) {
-            this.traps.forEach((trap) => this.trapManager.addTrap(trap.type, trap.x, trap.y))
+            this.traps.forEach((trap) => this.trapManager.addTrap(trap.type, trap.x, trap.y, trap.options))
         }
 
     }
@@ -70,9 +70,9 @@ export default class Scene {
     update() {
         this.backgroundImage.draw(0, 0);
         this.drawBackgroundTile();
+        this.trapManager.update();
         this.tileMapRender.render();
         this.fruitManager.update();
-        this.trapManager.update();
 
 
         if (this.player && this.player.shouldRemove()) {

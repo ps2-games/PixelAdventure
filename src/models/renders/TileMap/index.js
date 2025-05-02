@@ -14,8 +14,8 @@ export default class TileMapRender {
             this.collisionTiles.push({
                 x: tile.tileX,
                 y: tile.tileY,
-                width: TILE_SIZE,
-                height: TILE_SIZE,
+                width: tile.width || TILE_SIZE,
+                height: tile.height || TILE_SIZE,
                 type: tile.type
             });
 

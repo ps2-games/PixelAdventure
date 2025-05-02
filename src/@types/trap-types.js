@@ -1,7 +1,8 @@
 const TrapTypes = {
     SPIKE: 'spike',
     SPIKE_HEAD: 'spikeHead',
-    BOX: 'box'
+    BOX: 'box',
+    SAW: 'saw'
 };
 
 export default TrapTypes
