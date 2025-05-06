@@ -4,7 +4,7 @@ import PLAYER_ANIMATIONS, { PlayerAnimationsStates } from "./constants/animation
 import PlayerMovementController from "./movement/index.js";
 
 export default class Player extends AnimatableEntity {
-  constructor(canvasWidth, canvasHeight, options = {}) {
+  constructor(options = {}) {
     super(options.initialX || 0, options.initialY || 0, 32, 32, PLAYER_ANIMATIONS);
 
     this.deathRotation = 0;
@@ -13,36 +13,48 @@ export default class Player extends AnimatableEntity {
     this.isDying = false;
     this.isDeathAnimationComplete = false;
 
+    this._position = { x: 0, y: 0 };
+    this._velocity = { x: 0, y: 0 };
+    this._bounds = { left: 0, top: 0, right: 0, bottom: 0 };
+    this._currentState = null;
+
+    const onJump = (canMove) => canMove && this.setAnimation(PlayerAnimationsStates.JUMP);
+    const onDoubleJump = (canMove) => canMove && this.setAnimation(PlayerAnimationsStates.DOUBLE_JUMP);
+
+    const onDirectionChange = (direction, canMove) => {
+      if (canMove) {
+        this.flipX = direction === PlayerMovementConstants.DIRECTION.LEFT;
+      }
+    };
+
     this.movementController = new PlayerMovementController({
       initialX: options.initialX || 0,
       initialY: options.initialY || 0,
       entity: this,
       tileMap: options.tileMap,
-      onJump: (canMove) => canMove && this.setAnimation(PlayerAnimationsStates.JUMP),
-      onDoubleJump: (canMove) => canMove && this.setAnimation(PlayerAnimationsStates.DOUBLE_JUMP),
-      onLand: (velocity, canMove) => {
-        if (velocity.x !== 0 && canMove) {
-          this.setAnimation(PlayerAnimationsStates.RUN);
-        } else {
-          this.setAnimation(PlayerAnimationsStates.IDLE);
-        }
-      },
-      onDirectionChange: (direction, canMove) => {
-        if (canMove) {
-          this.flipX = direction === PlayerMovementConstants.DIRECTION.LEFT;
-        }
-      },
-      onWallSlideStart: (canMove) => {
-        if (canMove) {
-          this.setAnimation(PlayerAnimationsStates.WALL_JUMP)
-        }
-      },
-      onWallSlideEnd: (canMove) => {
-        if (canMove) {
-          this.setAnimation(PlayerAnimationsStates.IDLE)
-        }
-      },
-    })
+      callbacks: {
+        onJump,
+        onDoubleJump,
+        onLand: (velocity, canMove) => {
+          if (canMove) {
+            this.setAnimation(velocity.x !== 0 ?
+              PlayerAnimationsStates.RUN :
+              PlayerAnimationsStates.IDLE);
+          }
+        },
+        onDirectionChange,
+        onWallSlideStart: (canMove) => {
+          if (canMove) {
+            this.setAnimation(PlayerAnimationsStates.WALL_JUMP);
+          }
+        },
+        onWallSlideEnd: (canMove) => {
+          if (canMove) {
+            this.setAnimation(PlayerAnimationsStates.IDLE);
+          }
+        },
+      }
+    });
 
     this.pads = Pads.get();
 
@@ -51,36 +63,36 @@ export default class Player extends AnimatableEntity {
     };
   }
 
-
   handleAnimation() {
     if (this.isDying && this.isDeathAnimationComplete) {
       return;
     }
 
+    const movementState = this.movementController.state;
     const velocity = this.movementController.getVelocity();
-    const jumpsRemaining = this.movementController.state.jumpsRemaining;
-    const currentState = this.getCurrentAnimation();
+    const jumpsRemaining = movementState.jumpsRemaining;
+    const currentAnimation = this.getCurrentAnimation();
+    const canMove = movementState.canMove;
 
-    let newState = PlayerAnimationsStates.IDLE;
+    let newState;
 
-    if (this.movementController.state.canMove) {
-      if (velocity.y < 0 && jumpsRemaining === 0) {
-        newState = PlayerAnimationsStates.DOUBLE_JUMP;
-      } else if (velocity.y < 0) {
-        newState = PlayerAnimationsStates.JUMP;
-      } else if (velocity.y > 0 && !this.movementController.state.isWallSliding) {
-        newState = PlayerAnimationsStates.FALL;
-      } else if (velocity.y > 0 && this.movementController.state.isWallSliding) {
-        newState = PlayerAnimationsStates.WALL_JUMP;
-      } else if (velocity.x !== 0) {
-        newState = PlayerAnimationsStates.RUN;
-      }
-    }
-    else {
+    if (!canMove) {
       newState = PlayerAnimationsStates.HIT;
+    } else if (velocity.y < 0) {
+      newState = jumpsRemaining === 0 ?
+        PlayerAnimationsStates.DOUBLE_JUMP :
+        PlayerAnimationsStates.JUMP;
+    } else if (velocity.y > 0) {
+      newState = movementState.isWallSliding ?
+        PlayerAnimationsStates.WALL_JUMP :
+        PlayerAnimationsStates.FALL;
+    } else {
+      newState = velocity.x !== 0 ?
+        PlayerAnimationsStates.RUN :
+        PlayerAnimationsStates.IDLE;
     }
 
-    if (currentState !== newState) {
+    if (currentAnimation !== this.animations[newState]) {
       this.setAnimation(newState);
     }
 
@@ -100,13 +112,14 @@ export default class Player extends AnimatableEntity {
       moving = true;
     }
 
+    if (this.pads.justPressed(Pads.UP)) {
+      this.movementController.jump();
+    }
+
     if (!moving) {
       this.movementController.stopHorizontalMovement();
     }
 
-    if (this.pads.justPressed(Pads.UP)) {
-      this.movementController.jump();
-    }
     // this.drawCollisionBox(this.movementController.position.x, this.movementController.position.y)
   }
 
@@ -125,30 +138,31 @@ export default class Player extends AnimatableEntity {
 
       this.deathVelocity.y += 0.5;
     }
+
     this.handleAnimation();
     this.draw();
   }
 
   getBounds() {
     const position = this.movementController.getPosition();
-    const { frameHeight } = this.getCurrentAnimation()
+    const { frameHeight } = this.getCurrentAnimation();
 
-    return {
-      left: position.x,
-      top: position.y + 6,
-      right: position.x + 28,
-      bottom: position.y + frameHeight,
-    };
+    this._bounds.left = position.x;
+    this._bounds.top = position.y + 6;
+    this._bounds.right = position.x + 28;
+    this._bounds.bottom = position.y + frameHeight;
+
+    return this._bounds;
   }
 
   draw() {
-    const { frameWidth, frameHeight, image } = this.getCurrentAnimation();
+    const currentAnimation = this.getCurrentAnimation();
+    const { frameWidth, frameHeight, image } = currentAnimation;
     const frameX = this.getCurrentFrame() * frameWidth;
     const position = this.movementController.getPosition();
     const isWallSliding = this.movementController.state.isWallSliding;
 
     const xOffset = isWallSliding ? (this.flipX ? -5 : 5) : 0;
-
     const drawX = this.flipX ?
       position.x + frameWidth + xOffset :
       position.x + xOffset;
@@ -157,13 +171,7 @@ export default class Player extends AnimatableEntity {
     image.starty = 0;
     image.endx = frameX + frameWidth;
     image.endy = frameHeight;
-
-    if (this.isDying) {
-      image.angle = this.deathRotation;
-    } else {
-      image.angle = 0;
-    }
-
+    image.angle = this.isDying ? this.deathRotation : 0;
     image.width = this.flipX ? -Math.abs(frameWidth) : Math.abs(frameWidth);
     image.height = frameHeight;
 
@@ -186,7 +194,9 @@ export default class Player extends AnimatableEntity {
   }
 
   shouldRemove() {
+    if (!this.isDying) return false;
+
     const position = this.movementController.getPosition();
-    return this.isDying && ((position.y > 1000 || Math.abs(position.x) > 1000));
+    return position.y > 1000 || Math.abs(position.x) > 1000;
   }
 }

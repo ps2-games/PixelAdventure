@@ -6,26 +6,33 @@ export default class Entity {
     this.height = height;
 
     this.debugColor = Color.new(255, 0, 0, 50);
+
+    this._bounds = {
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0
+    };
   }
 
   getBounds() {
-    return {
-      left: this.x,
-      top: this.y,
-      right: this.x + this.width,
-      bottom: this.y + this.height,
-    };
+    this._bounds.left = this.x;
+    this._bounds.top = this.y;
+    this._bounds.right = this.x + this.width;
+    this._bounds.bottom = this.y + this.height;
+
+    return this._bounds;
   }
 
   isColliding(otherEntity) {
     const a = this.getBounds();
     const b = otherEntity.getBounds();
 
-    return (
-      a.left < b.right &&
-      a.right > b.left &&
-      a.top < b.bottom &&
-      a.bottom > b.top
+    return !(
+      a.left >= b.right ||
+      a.right <= b.left ||
+      a.top >= b.bottom ||
+      a.bottom <= b.top
     );
   }
 
@@ -38,7 +45,10 @@ export default class Entity {
   }
 
   drawCollisionBox(x = this.x, y = this.y) {
-    const bounds = this.getBounds();
+    const bounds = (x === this.x && y === this.y) ?
+      this._bounds :
+      { left: x, top: y, right: x + this.width, bottom: y + this.height };
+
     Draw.quad(
       bounds.left, bounds.top,
       bounds.right, bounds.top,

@@ -10,6 +10,8 @@ export default class AnimatableEntity extends Entity {
 
         this.lastUpdate = Date.now();
 
+        this._lastAnimationName = null;
+
         const firstAnimationKey = Object.keys(animations)[0];
         if (firstAnimationKey) {
             this.setAnimation(firstAnimationKey);
@@ -17,9 +19,13 @@ export default class AnimatableEntity extends Entity {
     }
 
     setAnimation(name) {
-        if (this.animations[name] && this.currentAnimation !== this.animations[name]) {
-            this.currentAnimation = this.animations[name];
+        if (name === this._lastAnimationName) return;
+
+        const animation = this.animations[name];
+        if (animation && this.currentAnimation !== animation) {
+            this.currentAnimation = animation;
             this.currentFrame = 0;
+            this._lastAnimationName = name;
         }
     }
 
@@ -32,6 +38,8 @@ export default class AnimatableEntity extends Entity {
     }
 
     isAnimationFinished() {
+        if (!this.currentAnimation) return false;
+
         return (
             !this.currentAnimation.loop &&
             this.currentFrame === this.currentAnimation.totalFrames - 1
@@ -39,26 +47,29 @@ export default class AnimatableEntity extends Entity {
     }
 
     updateAnimation() {
-
         if (!this.currentAnimation) return;
 
         const now = Date.now();
-        if (now - this.lastUpdate > this.currentAnimation.animationSpeed) {
-            this.currentFrame++;
+        const elapsed = now - this.lastUpdate;
+        const speed = this.currentAnimation.animationSpeed;
 
-            if (this.currentFrame >= this.currentAnimation.totalFrames) {
+        if (elapsed > speed) {
+            const framesToAdvance = Math.floor(elapsed / speed);
+            this.currentFrame += framesToAdvance;
+
+            const totalFrames = this.currentAnimation.totalFrames;
+
+            if (this.currentFrame >= totalFrames) {
                 if (this.currentAnimation.loop) {
-                    this.currentFrame = 0;
+                    this.currentFrame %= totalFrames;
                 } else {
-                    this.currentFrame = this.currentAnimation.totalFrames - 1;
-
-                    if (this.currentAnimation.onAnimationEnd) {
-                        this.currentAnimation.onAnimationEnd();
-                    }
+                    this.currentFrame = totalFrames - 1;
+                    const onEnd = this.currentAnimation.onAnimationEnd;
+                    if (onEnd) onEnd();
                 }
             }
 
-            this.lastUpdate = now;
+            this.lastUpdate = now - (elapsed % speed);
         }
     }
 }

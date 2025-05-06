@@ -5,7 +5,11 @@ import { PlayerMovementConstants } from "../constants/movement.js";
 
 export default class PlayerMovementController {
     constructor(options = {}) {
-        const { width, height } = Screen.getMode()
+        const { width, height } = Screen.getMode();
+
+        this._entityWidth = options.entity?.width || 32;
+        this._entityHeight = options.entity?.height || 32;
+
         this.position = {
             x: options.initialX || 0,
             y: options.initialY || 0
@@ -25,8 +29,8 @@ export default class PlayerMovementController {
 
         this.constraints = {
             minX: 0,
-            maxX: width - 32,
-            maxY: height - 32,
+            maxX: width - this._entityWidth,
+            maxY: height - this._entityHeight,
             minY: options.minY,
         };
 
@@ -41,18 +45,20 @@ export default class PlayerMovementController {
             canMove: true,
         };
 
-        this.callbacks = {
-            onJump: options.onJump,
-            onDoubleJump: options.onDoubleJump,
-            onLand: options.onLand,
-            onDirectionChange: options.onDirectionChange,
-            onMove: options.onMove,
-            onWallSlideStart: options.onWallSlideStart,
-            onWallSlideEnd: options.onWallSlideEnd
-        };
+        this.callbacks = options.callbacks || {};
 
         this.tileMap = options.tileMap || [];
         this.entity = options.entity;
+
+        this._collisionCache = {
+            nearbyTiles: [],
+            hCollision: null,
+            vCollision: null
+        };
+
+        this._tempPosition = { x: 0, y: 0 };
+        this._tempVelocity = { x: 0, y: 0 };
+
         this.initSpatialGrid();
     }
 
@@ -61,12 +67,13 @@ export default class PlayerMovementController {
         this.spatialGrid = {};
         this.cellSize = cellSize;
 
+        this._invCellSize = 1 / cellSize;
+
         const tileMapLength = this.tileMap.length;
         for (let i = 0; i < tileMapLength; i++) {
             const tile = this.tileMap[i];
-
-            const gridX = Math.floor(tile.x / cellSize);
-            const gridY = Math.floor(tile.y / cellSize);
+            const gridX = Math.floorf(tile.x * this._invCellSize);
+            const gridY = Math.floorf(tile.y * this._invCellSize);
             const cellKey = `${gridX},${gridY}`;
 
             if (!this.spatialGrid[cellKey]) {
@@ -78,7 +85,6 @@ export default class PlayerMovementController {
     }
 
     checkWallCollision() {
-
         if (this.state.isGrounded) {
             if (this.state.isWallSliding) {
                 this.state.isWallSliding = false;
@@ -91,14 +97,12 @@ export default class PlayerMovementController {
 
         const collisionDistance = 5;
         const direction = this.state.facingDirection;
-        const entityWidth = this.entity.width;
-        const entityHeight = this.entity.height;
 
         const testX = direction === 'RIGHT'
-            ? this.position.x + entityWidth + collisionDistance
+            ? this.position.x + this._entityWidth + collisionDistance
             : this.position.x - collisionDistance;
 
-        const testY = this.position.y + entityHeight / 2;
+        const testY = this.position.y + (this._entityHeight / 2);
 
         const nearbyTiles = this.getNearbyCollisionTiles(testX, testY);
         const nearbyTilesLength = nearbyTiles.length;
@@ -111,16 +115,11 @@ export default class PlayerMovementController {
 
             if (!tileProps.collidable || tileProps.isPlatform) continue;
 
-            const tileLeft = tile.x;
-            const tileRight = tile.x + tile.width;
-            const tileTop = tile.y;
-            const tileBottom = tile.y + tile.height;
-
             if (
-                testX >= tileLeft &&
-                testX <= tileRight &&
-                testY >= tileTop &&
-                testY <= tileBottom
+                testX >= tile.x &&
+                testX <= tile.x + tile.width &&
+                testY >= tile.y &&
+                testY <= tile.y + tile.height
             ) {
                 if ((direction === 'RIGHT' && this.velocity.x > 0) ||
                     (direction === 'LEFT' && this.velocity.x < 0)) {
@@ -144,7 +143,9 @@ export default class PlayerMovementController {
 
     update(deltaTime = 1) {
         if (this.state.affectedByGravity) {
-            this.applyGravity(deltaTime);
+            if (this.velocity.y < this.physics.maxVelocityY) {
+                this.velocity.y += this.physics.gravity * deltaTime;
+            }
         }
 
         if (!this.state.canMove) {
@@ -161,10 +162,9 @@ export default class PlayerMovementController {
         this.checkBoundaryCollisions();
     }
 
-
     checkTileCollision(newX, newY, direction) {
-        const entityRight = newX + this.entity.width;
-        const entityBottom = newY + this.entity.height;
+        const entityRight = newX + this._entityWidth;
+        const entityBottom = newY + this._entityHeight;
 
         let closestTile = null;
         let closestTileProps = null;
@@ -179,30 +179,27 @@ export default class PlayerMovementController {
 
             if (!tileProps.collidable) continue;
 
-            const tileLeft = tile.x;
-            const tileRight = tile.x + tile.width;
-            const tileTop = tile.y;
-            const tileBottom = tile.y + tile.height;
-
             if (
-                newX < tileRight &&
-                entityRight > tileLeft &&
-                newY < tileBottom &&
-                entityBottom > tileTop
+                newX < tile.x + tile.width &&
+                entityRight > tile.x &&
+                newY < tile.y + tile.height &&
+                entityBottom > tile.y
             ) {
                 if (tileProps.isPlatform) {
                     if (this.velocity.y > 0) {
                         const steps = Math.min(3, Math.ceil(Math.abs(this.velocity.y * 2)));
+                        const stepFactor = 1 / steps;
+                        const deltaY = newY - this.position.y;
 
                         for (let j = 0; j <= steps; j++) {
-                            const testY = this.position.y + (newY - this.position.y) * (j / steps);
-                            const testBottom = testY + this.entity.height;
+                            const testY = this.position.y + deltaY * (j * stepFactor);
+                            const testBottom = testY + this._entityHeight;
 
                             if (
-                                testBottom >= tileTop &&
-                                testBottom <= tileTop + 10 &&
-                                entityRight > tileLeft + 5 &&
-                                newX < tileRight - 5
+                                testBottom >= tile.y &&
+                                testBottom <= tile.y + 10 &&
+                                entityRight > tile.x + 5 &&
+                                newX < tile.x + tile.width - 5
                             ) {
                                 return { tile, tileProps };
                             }
@@ -214,14 +211,15 @@ export default class PlayerMovementController {
                 let distance;
                 if (direction === 'horizontal') {
                     distance = (this.velocity.x > 0) ?
-                        Math.abs(entityRight - tileLeft) :
-                        Math.abs(tileRight - newX);
+                        entityRight - tile.x :
+                        tile.x + tile.width - newX;
                 } else {
                     distance = (this.velocity.y > 0) ?
-                        Math.abs(entityBottom - tileTop) :
-                        Math.abs(tileBottom - newY);
+                        entityBottom - tile.y :
+                        tile.y + tile.height - newY;
                 }
 
+                distance = Math.abs(distance);
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestTile = tile;
@@ -234,12 +232,11 @@ export default class PlayerMovementController {
     }
 
     getNearbyCollisionTiles(x, y) {
-        const cellSize = this.cellSize || TILE_SIZE * 4;
-        const entityGridX = Math.floor(x / cellSize);
-        const entityGridY = Math.floor(y / cellSize);
+        this._collisionCache.nearbyTiles.length = 0;
+        const result = this._collisionCache.nearbyTiles;
 
-        const result = [];
-        let resultLength = 0;
+        const entityGridX = Math.floorf(x * this._invCellSize);
+        const entityGridY = Math.floorf(y * this._invCellSize);
 
         for (let i = entityGridX - 1; i <= entityGridX + 1; i++) {
             for (let j = entityGridY - 1; j <= entityGridY + 1; j++) {
@@ -249,19 +246,13 @@ export default class PlayerMovementController {
                 if (tilesInCell) {
                     const cellLength = tilesInCell.length;
                     for (let k = 0; k < cellLength; k++) {
-                        result[resultLength++] = tilesInCell[k];
+                        result.push(tilesInCell[k]);
                     }
                 }
             }
         }
 
         return result;
-    }
-
-    applyGravity(deltaTime) {
-        if (this.velocity.y < this.physics.maxVelocityY) {
-            this.velocity.y += this.physics.gravity * deltaTime;
-        }
     }
 
     updatePosition(deltaTime) {
@@ -271,11 +262,12 @@ export default class PlayerMovementController {
         if (this.state.canMove) {
             if (this.velocity.y !== 0) {
                 const vCollision = this.checkTileCollision(this.position.x, newY, 'vertical');
+                this._collisionCache.vCollision = vCollision;
 
                 if (vCollision) {
                     if (vCollision.tileProps.isPlatform) {
-                        if (this.velocity.y > 0 && this.position.y + this.entity.height <= vCollision.tile.y) {
-                            newY = vCollision.tile.y - this.entity.height;
+                        if (this.velocity.y > 0 && this.position.y + this._entityHeight <= vCollision.tile.y) {
+                            newY = vCollision.tile.y - this._entityHeight;
                             this.velocity.y = 0;
 
                             const justLanded = !this.state.isGrounded;
@@ -288,7 +280,7 @@ export default class PlayerMovementController {
                         }
                     } else if (vCollision.tileProps.collidable) {
                         if (this.velocity.y > 0) {
-                            newY = vCollision.tile.y - this.entity.height;
+                            newY = vCollision.tile.y - this._entityHeight;
                             this.velocity.y = 0;
 
                             const justLanded = !this.state.isGrounded;
@@ -311,10 +303,11 @@ export default class PlayerMovementController {
 
             if (this.velocity.x !== 0) {
                 const hCollision = this.checkTileCollision(newX, this.position.y, 'horizontal');
+                this._collisionCache.hCollision = hCollision;
 
                 if (hCollision && hCollision.tileProps.collidable && !hCollision.tileProps.isPlatform) {
                     if (this.velocity.x > 0) {
-                        newX = hCollision.tile.x - this.entity.width;
+                        newX = hCollision.tile.x - this._entityWidth;
                     } else if (this.velocity.x < 0) {
                         newX = hCollision.tile.x + hCollision.tile.width;
                     }
@@ -334,26 +327,30 @@ export default class PlayerMovementController {
         this.position.y = newY;
 
         if (this.callbacks.onMove) {
-            this.callbacks.onMove(this.position.x, this.position.y, this.state.canMove);
+            this.callbacks.onMove(newX, newY, this.state.canMove);
         }
     }
 
     checkBoundaryCollisions() {
         const wasGrounded = this.state.isGrounded;
+        let collided = false;
 
         if (this.constraints.minX !== undefined && this.position.x < this.constraints.minX) {
             this.position.x = this.constraints.minX;
             this.velocity.x = 0;
+            collided = true;
         }
 
         if (this.constraints.maxX !== undefined && this.position.x > this.constraints.maxX) {
             this.position.x = this.constraints.maxX;
             this.velocity.x = 0;
+            collided = true;
         }
 
         if (this.constraints.minY !== undefined && this.position.y < this.constraints.minY) {
             this.position.y = this.constraints.minY;
             this.velocity.y = 0;
+            collided = true;
         }
 
         if (this.constraints.maxY !== undefined && this.position.y > this.constraints.maxY) {
@@ -369,6 +366,8 @@ export default class PlayerMovementController {
         } else if (this.constraints.maxY !== undefined) {
             this.state.isGrounded = false;
         }
+
+        return collided;
     }
 
     moveRight(multiplier = 1) {
@@ -376,8 +375,8 @@ export default class PlayerMovementController {
         this.velocity.x = this.physics.speed * multiplier;
         this.state.facingDirection = 'RIGHT';
 
-        if (prevDirection !== this.state.facingDirection && this.callbacks.onDirectionChange) {
-            this.callbacks.onDirectionChange(this.state.facingDirection, this.state.canMove);
+        if (prevDirection !== 'RIGHT' && this.callbacks.onDirectionChange) {
+            this.callbacks.onDirectionChange('RIGHT', this.state.canMove);
         }
     }
 
@@ -386,8 +385,8 @@ export default class PlayerMovementController {
         this.velocity.x = -this.physics.speed * multiplier;
         this.state.facingDirection = 'LEFT';
 
-        if (prevDirection !== this.state.facingDirection && this.callbacks.onDirectionChange) {
-            this.callbacks.onDirectionChange(this.state.facingDirection, this.state.canMove);
+        if (prevDirection !== 'LEFT' && this.callbacks.onDirectionChange) {
+            this.callbacks.onDirectionChange('LEFT', this.state.canMove);
         }
     }
 
@@ -397,7 +396,7 @@ export default class PlayerMovementController {
 
     forcedJump(multiplier = 1) {
         if (!this.state.canMove) {
-            return;
+            return false;
         }
 
         this.velocity.y = this.physics.jumpStrength * multiplier;
@@ -405,20 +404,22 @@ export default class PlayerMovementController {
         this.state.isGrounded = false;
         this.state.isWallSliding = false;
 
-        this.callbacks.onJump(this.state.canMove);
+        if (this.callbacks.onJump) {
+            this.callbacks.onJump(this.state.canMove);
+        }
         this.state.jumpsRemaining = 2;
 
         return true;
     }
 
     jump(multiplier = 1) {
-
         if (!this.state.canMove) {
-            return;
+            return false;
         }
 
         if (this.state.isGrounded || this.state.jumpsRemaining > 0) {
             this.velocity.y = this.physics.jumpStrength * multiplier;
+
             this.state.isJumping = true;
             this.state.isGrounded = false;
             this.state.isWallSliding = false;
@@ -431,7 +432,6 @@ export default class PlayerMovementController {
             }
 
             this.state.jumpsRemaining--;
-
             return true;
         }
         else if (this.state.isWallSliding) {
@@ -440,11 +440,11 @@ export default class PlayerMovementController {
             this.state.isJumping = true;
             this.state.isGrounded = false;
             this.state.isWallSliding = false;
+            this.state.jumpsRemaining = this.state.maxJumps;
 
             if (this.callbacks.onJump) {
                 this.callbacks.onJump();
             }
-
             return true;
         }
         return false;
@@ -456,10 +456,14 @@ export default class PlayerMovementController {
     }
 
     getPosition() {
-        return { ...this.position };
+        this._tempPosition.x = this.position.x;
+        this._tempPosition.y = this.position.y;
+        return this._tempPosition;
     }
 
     getVelocity() {
-        return { ...this.velocity };
+        this._tempVelocity.x = this.velocity.x;
+        this._tempVelocity.y = this.velocity.y;
+        return this._tempVelocity;
     }
 }
