@@ -65,24 +65,24 @@ export default class Scene {
         }
     }
 
-    update() {
+    update(deltaTime = 16.67) {
         this.backgroundImage.draw(0, 0);
         this.drawBackgroundTile();
 
+        this.fruitManager.update(deltaTime);
+        this.trapManager.update(deltaTime);
+        this.tileMapRender.render();
+
         if (this.player && this.player.shouldRemove()) {
             this.player = null;
-        }
-
-        if (this.player) {
-            this.player.update();
         }
 
         if (this.blanketTileMap) {
             this.blanketTileMap.render();
         }
 
-        this.fruitManager.update();
-        this.trapManager.update();
-        this.tileMapRender.render();
+        if (this.player) {
+            this.player.update(deltaTime);
+        }
     }
 }

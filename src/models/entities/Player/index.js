@@ -123,20 +123,20 @@ export default class Player extends AnimatableEntity {
     // this.drawCollisionBox(this.movementController.position.x, this.movementController.position.y)
   }
 
-  update() {
+  update(deltaTime = 16.67) {
     if (!this.isDying) {
       this.handleInput();
-      this.movementController.update();
+      this.movementController.update(deltaTime);
     } else {
-      this.deathRotation += this.deathRotationSpeed;
+      this.deathRotation += this.deathRotationSpeed * deltaTime;
 
       const position = this.movementController.getPosition();
       this.movementController.setPosition(
-        position.x + this.deathVelocity.x,
-        position.y + this.deathVelocity.y
+        position.x + this.deathVelocity.x * deltaTime,
+        position.y + this.deathVelocity.y * deltaTime
       );
 
-      this.deathVelocity.y += 0.5;
+      this.deathVelocity.y += 0.5 * deltaTime;
     }
 
     this.handleAnimation();

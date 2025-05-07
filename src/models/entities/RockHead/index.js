@@ -13,9 +13,10 @@ export default class RockHead extends AnimatableEntity {
 
         this.lastBlink = Date.now();
 
-        this.speed = options.speed;
-        this.acceleration = options.speed;
-        this.maxVelocity = options.maxVelocity;
+        this.baseSpeed = options.speed || 2;
+        this.currentSpeed = this.baseSpeed;
+        this.speedIncrement = options.acceleration || 0.25;
+        this.maxVelocity = options.maxVelocity || 10;
 
         this.direction = options.direction;
 
@@ -184,10 +185,8 @@ export default class RockHead extends AnimatableEntity {
     }
 
     updatePosition(deltaTime) {
-        const dt = deltaTime || 1;
-
-        let newX = this.x + this.velocity.x * dt;
-        let newY = this.y + this.velocity.y * dt;
+        let newX = this.x + (this.velocity.x * deltaTime);
+        let newY = this.y + (this.velocity.y * deltaTime);
 
         if (this.isActive) {
             const isVertical = this.direction === 'VERTICAL';
@@ -209,11 +208,13 @@ export default class RockHead extends AnimatableEntity {
                             this.velocity.y = 0;
                             this.setAnimation(RockHeadAnimationState.BOTTOM_HIT);
                             this.state.isMovingUp = true;
+                            this.resetSpeed();
                         } else if (this.velocity.y < 0) {
                             newY = tile.y + tile.height;
                             this.velocity.y = 0;
                             this.setAnimation(RockHeadAnimationState.TOP_HIT);
                             this.state.isMovingUp = false;
+                            this.resetSpeed();
                         }
                     }
                 }
@@ -230,11 +231,13 @@ export default class RockHead extends AnimatableEntity {
                         this.velocity.x = 0;
                         this.setAnimation(RockHeadAnimationState.RIGHT_HIT);
                         this.state.isMovingRight = false;
+                        this.resetSpeed();
                     } else if (this.velocity.x < 0) {
                         newX = tile.x + tile.width;
                         this.velocity.x = 0;
                         this.setAnimation(RockHeadAnimationState.LEFT_HIT);
                         this.state.isMovingRight = true;
+                        this.resetSpeed();
                     }
                 }
             }
@@ -242,6 +245,23 @@ export default class RockHead extends AnimatableEntity {
 
         this.x = newX;
         this.y = newY;
+    }
+
+    resetSpeed() {
+        this.currentSpeed = this.baseSpeed;
+    }
+
+    increaseSpeed(deltaTime) {
+        this.currentSpeed += this.speedIncrement * deltaTime;
+    }
+
+    getBounds() {
+        this._bounds.left = this.x + 5;
+        this._bounds.top = this.y + 5;
+        this._bounds.right = this.x + this.width - 5;
+        this._bounds.bottom = this.y + this.height - 5;
+
+        return this._bounds;
     }
 
     draw() {
@@ -260,16 +280,28 @@ export default class RockHead extends AnimatableEntity {
     }
 
     moveVertically() {
-        const acceleration = this.acceleration * (this.state.isMovingUp ? -1 : 1);
-        this.velocity.y = Math.max(-this.maxVelocity, Math.min(this.maxVelocity, this.velocity.y + acceleration));
+        this.velocity.y = this.state.isMovingUp ?
+            -Math.min(this.currentSpeed, this.maxVelocity) :
+            Math.min(this.currentSpeed, this.maxVelocity);
     }
 
     moveHorizontally() {
-        const acceleration = this.acceleration * (this.state.isMovingRight ? 1 : -1);
-        this.velocity.x = Math.max(-this.maxVelocity, Math.min(this.maxVelocity, this.velocity.x + acceleration));
+        this.velocity.x = this.state.isMovingRight ?
+            Math.min(this.currentSpeed, this.maxVelocity) :
+            -Math.min(this.currentSpeed, this.maxVelocity);
     }
 
-    move() {
+    move(deltaTime) {
+        const currentAnimationState = this.getCurrentAnimation();
+        if (![
+            RockHeadAnimationState.TOP_HIT,
+            RockHeadAnimationState.BOTTOM_HIT,
+            RockHeadAnimationState.LEFT_HIT,
+            RockHeadAnimationState.RIGHT_HIT
+        ].includes(currentAnimationState)) {
+            this.increaseSpeed(deltaTime);
+        }
+
         if (this.direction === 'HORIZONTAL') {
             this.moveHorizontally();
         } else {
@@ -288,7 +320,7 @@ export default class RockHead extends AnimatableEntity {
     }
 
     update(deltaTime) {
-        this.move();
+        this.move(deltaTime);
         this.updatePosition(deltaTime);
 
         if (this.getCurrentAnimation() === this.animations[RockHeadAnimationState.IDLE]) {

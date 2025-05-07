@@ -24,10 +24,10 @@ export default class SawTrap extends AnimatableEntity {
         }
     }
 
-    moveToEndX() {
+    moveToEndX(deltaTime) {
         if (this.endX === null) return;
 
-        this.x += this.speed * this.direction;
+        this.x += (this.speed * this.direction) * deltaTime;
 
         if ((this.direction === 1 && this.x >= this.initialX) ||
             (this.direction === -1 && this.x <= this.endX)) {
@@ -61,8 +61,8 @@ export default class SawTrap extends AnimatableEntity {
         }
     }
 
-    update() {
-        this.moveToEndX();
+    update(deltaTime) {
+        this.moveToEndX(deltaTime);
         this.draw();
         this.killPlayer();
         this.updateAnimation();

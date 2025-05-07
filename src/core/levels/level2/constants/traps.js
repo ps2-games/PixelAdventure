@@ -41,9 +41,9 @@ const traps = [
         y: 350,
         options: {
             direction: 'VERTICAL',
-            speed: 0.1,
-            acceleration: 5,
-            maxVelocity: 20
+            speed: 1.5,
+            acceleration: 0.1,
+            maxVelocity: 10
         }
     },
 ]

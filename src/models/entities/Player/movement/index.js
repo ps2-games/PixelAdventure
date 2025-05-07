@@ -256,8 +256,8 @@ export default class PlayerMovementController {
     }
 
     updatePosition(deltaTime) {
-        let newX = this.position.x + this.velocity.x * deltaTime;
-        let newY = this.position.y + this.velocity.y * deltaTime;
+        let newX = this.position.x + this.velocity.x * (deltaTime);
+        let newY = this.position.y + this.velocity.y * (deltaTime);
 
         if (this.state.canMove) {
             if (this.velocity.y !== 0) {

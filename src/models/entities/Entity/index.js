@@ -45,6 +45,7 @@ export default class Entity {
   }
 
   drawCollisionBox(x = this.x, y = this.y) {
+    this.getBounds()
     const bounds = (x === this.x && y === this.y) ?
       this._bounds :
       { left: x, top: y, right: x + this.width, bottom: y + this.height };
