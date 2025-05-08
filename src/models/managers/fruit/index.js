@@ -6,7 +6,7 @@ export default class FruitManager {
         this.fruitSlot = 0;
         this.fruitSlotSize = 4;
         this.collector = collector;
-        this.pickupFruitSound = Sound.load('./assets/sounds/pickup_fruit.adp');
+        this.pickupFruitSound = Sound.Sfx('./assets/sounds/pickup_fruit.adp');
     }
 
     addFruit(type, x, y) {

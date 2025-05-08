@@ -29,7 +29,7 @@ export default class Fruit extends AnimatableEntity {
 
   collect(scene) {
     if (this.isCollected) return;
-    Sound.play(this.collectedSound, scene.fruitSlot);
+    this.collectedSound.play(scene.fruitSlot);
 
     scene.fruitSlot = (scene.fruitSlot + 1) & (scene.fruitSlotSize - 1);
 

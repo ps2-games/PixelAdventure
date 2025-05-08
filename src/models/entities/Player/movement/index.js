@@ -3,6 +3,15 @@ import TileTypes from "../../../../@types/tile-types.js";
 import { TILE_SIZE } from "../../../../core/Scene/constants/index.js";
 import { PlayerMovementConstants } from "../constants/movement.js";
 
+const PLAYER_STATE = {
+    IS_JUMPING: 1,
+    IS_GROUNDED: 1 << 1,
+    IS_WALL_SLIDING: 1 << 2,
+    CAN_MOVE: 1 << 3,
+    AFFECTED_BY_GRAVITY: 1 << 4,
+    FACING_RIGHT: 1 << 5,
+};
+
 export default class PlayerMovementController {
     constructor(options = {}) {
         const { width, height } = Screen.getMode();
@@ -34,15 +43,52 @@ export default class PlayerMovementController {
             minY: options.minY,
         };
 
+        this._stateFlags = PLAYER_STATE.CAN_MOVE | PLAYER_STATE.FACING_RIGHT;
+        if (options.affectedByGravity !== false) {
+            this._stateFlags |= PLAYER_STATE.AFFECTED_BY_GRAVITY;
+        }
+
         this.state = {
-            isJumping: false,
-            facingDirection: 'RIGHT',
-            isGrounded: false,
-            affectedByGravity: options.affectedByGravity !== undefined ? options.affectedByGravity : true,
+            get isJumping() { return (this._parent._stateFlags & PLAYER_STATE.IS_JUMPING) !== 0; },
+            set isJumping(value) {
+                if (value) this._parent._stateFlags |= PLAYER_STATE.IS_JUMPING;
+                else this._parent._stateFlags &= ~PLAYER_STATE.IS_JUMPING;
+            },
+
+            get facingDirection() { return (this._parent._stateFlags & PLAYER_STATE.FACING_RIGHT) !== 0 ? 'RIGHT' : 'LEFT'; },
+            set facingDirection(value) {
+                if (value === 'RIGHT') this._parent._stateFlags |= PLAYER_STATE.FACING_RIGHT;
+                else this._parent._stateFlags &= ~PLAYER_STATE.FACING_RIGHT;
+            },
+
+            get isGrounded() { return (this._parent._stateFlags & PLAYER_STATE.IS_GROUNDED) !== 0; },
+            set isGrounded(value) {
+                if (value) this._parent._stateFlags |= PLAYER_STATE.IS_GROUNDED;
+                else this._parent._stateFlags &= ~PLAYER_STATE.IS_GROUNDED;
+            },
+
+            get affectedByGravity() { return (this._parent._stateFlags & PLAYER_STATE.AFFECTED_BY_GRAVITY) !== 0; },
+            set affectedByGravity(value) {
+                if (value) this._parent._stateFlags |= PLAYER_STATE.AFFECTED_BY_GRAVITY;
+                else this._parent._stateFlags &= ~PLAYER_STATE.AFFECTED_BY_GRAVITY;
+            },
+
             jumpsRemaining: 2,
             maxJumps: 2,
-            isWallSliding: false,
-            canMove: true,
+
+            get isWallSliding() { return (this._parent._stateFlags & PLAYER_STATE.IS_WALL_SLIDING) !== 0; },
+            set isWallSliding(value) {
+                if (value) this._parent._stateFlags |= PLAYER_STATE.IS_WALL_SLIDING;
+                else this._parent._stateFlags &= ~PLAYER_STATE.IS_WALL_SLIDING;
+            },
+
+            get canMove() { return (this._parent._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0; },
+            set canMove(value) {
+                if (value) this._parent._stateFlags |= PLAYER_STATE.CAN_MOVE;
+                else this._parent._stateFlags &= ~PLAYER_STATE.CAN_MOVE;
+            },
+
+            _parent: this
         };
 
         this.callbacks = options.callbacks || {};
@@ -53,17 +99,23 @@ export default class PlayerMovementController {
         this._collisionCache = {
             nearbyTiles: [],
             hCollision: null,
-            vCollision: null
+            vCollision: null,
+            lastGridPos: { x: null, y: null },
+            lastNearbyTiles: null,
+            tileCollisions: new Map()
         };
 
         this._tempPosition = { x: 0, y: 0 };
         this._tempVelocity = { x: 0, y: 0 };
 
+        this._positionCacheSize = 5;
+        this._positionCache = new Map();
+
         this.initSpatialGrid();
     }
 
     initSpatialGrid() {
-        const cellSize = TILE_SIZE * 4;
+        const cellSize = TILE_SIZE << 2;
         this.spatialGrid = {};
         this.cellSize = cellSize;
 
@@ -72,8 +124,8 @@ export default class PlayerMovementController {
         const tileMapLength = this.tileMap.length;
         for (let i = 0; i < tileMapLength; i++) {
             const tile = this.tileMap[i];
-            const gridX = Math.floorf(tile.x * this._invCellSize);
-            const gridY = Math.floorf(tile.y * this._invCellSize);
+            const gridX = (tile.x * this._invCellSize) | 0;
+            const gridY = (tile.y * this._invCellSize) | 0;
             const cellKey = `${gridX},${gridY}`;
 
             if (!this.spatialGrid[cellKey]) {
@@ -85,9 +137,10 @@ export default class PlayerMovementController {
     }
 
     checkWallCollision() {
-        if (this.state.isGrounded) {
-            if (this.state.isWallSliding) {
-                this.state.isWallSliding = false;
+
+        if ((this._stateFlags & PLAYER_STATE.IS_GROUNDED) !== 0) {
+            if ((this._stateFlags & PLAYER_STATE.IS_WALL_SLIDING) !== 0) {
+                this._stateFlags &= ~PLAYER_STATE.IS_WALL_SLIDING;
                 if (this.callbacks.onWallSlideEnd) {
                     this.callbacks.onWallSlideEnd();
                 }
@@ -96,13 +149,14 @@ export default class PlayerMovementController {
         }
 
         const collisionDistance = 5;
-        const direction = this.state.facingDirection;
 
-        const testX = direction === 'RIGHT'
+        const facingRight = (this._stateFlags & PLAYER_STATE.FACING_RIGHT) !== 0;
+
+        const testX = facingRight
             ? this.position.x + this._entityWidth + collisionDistance
             : this.position.x - collisionDistance;
 
-        const testY = this.position.y + (this._entityHeight / 2);
+        const testY = this.position.y + (this._entityHeight >> 1);
 
         const nearbyTiles = this.getNearbyCollisionTiles(testX, testY);
         const nearbyTilesLength = nearbyTiles.length;
@@ -121,48 +175,61 @@ export default class PlayerMovementController {
                 testY >= tile.y &&
                 testY <= tile.y + tile.height
             ) {
-                if ((direction === 'RIGHT' && this.velocity.x > 0) ||
-                    (direction === 'LEFT' && this.velocity.x < 0)) {
+                if ((facingRight && this.velocity.x > 0) ||
+                    (!facingRight && this.velocity.x < 0)) {
                     wallCollision = true;
                     break;
                 }
             }
         }
 
-        const wasWallSliding = this.state.isWallSliding;
-        this.state.isWallSliding = wallCollision;
+        const wasWallSliding = (this._stateFlags & PLAYER_STATE.IS_WALL_SLIDING) !== 0;
+
+        if (wallCollision) {
+            this._stateFlags |= PLAYER_STATE.IS_WALL_SLIDING;
+        } else {
+            this._stateFlags &= ~PLAYER_STATE.IS_WALL_SLIDING;
+        }
 
         if (wallCollision && !wasWallSliding && this.callbacks.onWallSlideStart) {
-            this.callbacks.onWallSlideStart(this.state.canMove);
+            this.callbacks.onWallSlideStart((this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
         } else if (!wallCollision && wasWallSliding && this.callbacks.onWallSlideEnd) {
-            this.callbacks.onWallSlideEnd(this.state.canMove);
+            this.callbacks.onWallSlideEnd((this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
         }
 
         return wallCollision;
     }
 
     update(deltaTime = 1) {
-        if (this.state.affectedByGravity) {
+        if ((this._stateFlags & PLAYER_STATE.AFFECTED_BY_GRAVITY) !== 0) {
             if (this.velocity.y < this.physics.maxVelocityY) {
                 this.velocity.y += this.physics.gravity * deltaTime;
             }
         }
 
-        if (!this.state.canMove) {
+        if ((this._stateFlags & PLAYER_STATE.CAN_MOVE) === 0) {
             this.velocity.x = 0;
             this.updatePosition(deltaTime);
             return;
         }
 
         this.checkWallCollision();
-        if (this.state.isWallSliding) {
+
+        if ((this._stateFlags & PLAYER_STATE.IS_WALL_SLIDING) !== 0) {
             this.velocity.y = Math.min(this.velocity.y, PlayerMovementConstants.WALL_SLIDE_SPEED);
         }
+
         this.updatePosition(deltaTime);
         this.checkBoundaryCollisions();
     }
 
     checkTileCollision(newX, newY, direction) {
+        const cacheKey = `${Math.floor(newX)},${Math.floor(newY)},${direction}`;
+
+        if (this._collisionCache.tileCollisions.has(cacheKey)) {
+            return this._collisionCache.tileCollisions.get(cacheKey);
+        }
+
         const entityRight = newX + this._entityWidth;
         const entityBottom = newY + this._entityHeight;
 
@@ -228,38 +295,68 @@ export default class PlayerMovementController {
             }
         }
 
-        return closestTile ? { tile: closestTile, tileProps: closestTileProps } : null;
+        const result = closestTile ? { tile: closestTile, tileProps: closestTileProps } : null;
+
+        this._collisionCache.tileCollisions.set(cacheKey, result);
+
+        if (this._collisionCache.tileCollisions.size > 20) {
+            const firstKey = this._collisionCache.tileCollisions.keys().next().value;
+            this._collisionCache.tileCollisions.delete(firstKey);
+        }
+
+        return result;
     }
 
     getNearbyCollisionTiles(x, y) {
+        const gridX = (x * this._invCellSize) | 0;
+        const gridY = (y * this._invCellSize) | 0;
+        const cacheKey = `${gridX},${gridY}`;
+
+        if (this._positionCache.has(cacheKey)) {
+            return this._positionCache.get(cacheKey);
+        }
+
         this._collisionCache.nearbyTiles.length = 0;
         const result = this._collisionCache.nearbyTiles;
 
-        const entityGridX = Math.floorf(x * this._invCellSize);
-        const entityGridY = Math.floorf(y * this._invCellSize);
-
-        for (let i = entityGridX - 1; i <= entityGridX + 1; i++) {
-            for (let j = entityGridY - 1; j <= entityGridY + 1; j++) {
+        for (let i = gridX - 1; i <= gridX + 1; i++) {
+            for (let j = gridY - 1; j <= gridY + 1; j++) {
                 const cellKey = `${i},${j}`;
                 const tilesInCell = this.spatialGrid[cellKey];
-
                 if (tilesInCell) {
-                    const cellLength = tilesInCell.length;
-                    for (let k = 0; k < cellLength; k++) {
-                        result.push(tilesInCell[k]);
-                    }
+                    result.push(...tilesInCell);
                 }
             }
         }
 
+        if (this._positionCache.size >= this._positionCacheSize) {
+            const firstKey = this._positionCache.keys().next().value;
+            this._positionCache.delete(firstKey);
+        }
+
+        this._positionCache.set(cacheKey, [...result]);
+
         return result;
+    }
+
+    clearCollisionCache() {
+        this._positionCache.clear();
+        this._collisionCache.tileCollisions.clear();
+        this._collisionCache.lastGridPos = { x: null, y: null };
+        this._collisionCache.lastNearbyTiles = null;
+        this._collisionCache.hCollision = null;
+        this._collisionCache.vCollision = null;
     }
 
     updatePosition(deltaTime) {
         let newX = this.position.x + this.velocity.x * (deltaTime);
         let newY = this.position.y + this.velocity.y * (deltaTime);
 
-        if (this.state.canMove) {
+        if (Math.abs(this.velocity.x) > 5 || Math.abs(this.velocity.y) > 5) {
+            this.clearCollisionCache();
+        }
+
+        if ((this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0) {
             if (this.velocity.y !== 0) {
                 const vCollision = this.checkTileCollision(this.position.x, newY, 'vertical');
                 this._collisionCache.vCollision = vCollision;
@@ -270,12 +367,13 @@ export default class PlayerMovementController {
                             newY = vCollision.tile.y - this._entityHeight;
                             this.velocity.y = 0;
 
-                            const justLanded = !this.state.isGrounded;
-                            this.state.isGrounded = true;
+                            const justLanded = (this._stateFlags & PLAYER_STATE.IS_GROUNDED) === 0;
+
+                            this._stateFlags |= PLAYER_STATE.IS_GROUNDED;
                             this.state.jumpsRemaining = this.state.maxJumps;
 
                             if (justLanded && this.callbacks.onLand) {
-                                this.callbacks.onLand(this.velocity, this.state.canMove);
+                                this.callbacks.onLand(this.velocity, (this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
                             }
                         }
                     } else if (vCollision.tileProps.collidable) {
@@ -283,10 +381,11 @@ export default class PlayerMovementController {
                             newY = vCollision.tile.y - this._entityHeight;
                             this.velocity.y = 0;
 
-                            const justLanded = !this.state.isGrounded;
-                            this.state.isGrounded = true;
+                            const justLanded = (this._stateFlags & PLAYER_STATE.IS_GROUNDED) === 0;
+
+                            this._stateFlags |= PLAYER_STATE.IS_GROUNDED;
+                            this._stateFlags &= ~PLAYER_STATE.IS_WALL_SLIDING;
                             this.state.jumpsRemaining = this.state.maxJumps;
-                            this.state.isWallSliding = false;
 
                             if (justLanded && this.callbacks.onLand) {
                                 this.callbacks.onLand(this.velocity);
@@ -297,7 +396,7 @@ export default class PlayerMovementController {
                         }
                     }
                 } else {
-                    this.state.isGrounded = false;
+                    this._stateFlags &= ~PLAYER_STATE.IS_GROUNDED;
                 }
             }
 
@@ -313,8 +412,9 @@ export default class PlayerMovementController {
                     }
                     this.velocity.x = 0;
 
-                    if (!this.state.isGrounded && !this.state.isWallSliding) {
-                        this.state.isWallSliding = true;
+                    if (((this._stateFlags & PLAYER_STATE.IS_GROUNDED) === 0) &&
+                        ((this._stateFlags & PLAYER_STATE.IS_WALL_SLIDING) === 0)) {
+                        this._stateFlags |= PLAYER_STATE.IS_WALL_SLIDING;
                         if (this.callbacks.onWallSlideStart) {
                             this.callbacks.onWallSlideStart();
                         }
@@ -327,12 +427,12 @@ export default class PlayerMovementController {
         this.position.y = newY;
 
         if (this.callbacks.onMove) {
-            this.callbacks.onMove(newX, newY, this.state.canMove);
+            this.callbacks.onMove(newX, newY, (this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
         }
     }
 
     checkBoundaryCollisions() {
-        const wasGrounded = this.state.isGrounded;
+        const wasGrounded = (this._stateFlags & PLAYER_STATE.IS_GROUNDED) !== 0;
         let collided = false;
 
         if (this.constraints.minX !== undefined && this.position.x < this.constraints.minX) {
@@ -354,39 +454,42 @@ export default class PlayerMovementController {
         }
 
         if (this.constraints.maxY !== undefined && this.position.y > this.constraints.maxY) {
-            this.position.y = this.constraints.maxY;
+            this.position.x = this.constraints.maxX;
             this.velocity.y = 0;
-            this.state.isJumping = false;
-            this.state.isGrounded = true;
+
+            this._stateFlags &= ~PLAYER_STATE.IS_JUMPING;
+            this._stateFlags |= PLAYER_STATE.IS_GROUNDED;
             this.state.jumpsRemaining = this.state.maxJumps;
 
             if (!wasGrounded && this.callbacks.onLand) {
                 this.callbacks.onLand(this.velocity);
             }
         } else if (this.constraints.maxY !== undefined) {
-            this.state.isGrounded = false;
+            this._stateFlags &= ~PLAYER_STATE.IS_GROUNDED;
         }
 
         return collided;
     }
 
     moveRight(multiplier = 1) {
-        const prevDirection = this.state.facingDirection;
+        const facingRight = (this._stateFlags & PLAYER_STATE.FACING_RIGHT) !== 0;
         this.velocity.x = this.physics.speed * multiplier;
-        this.state.facingDirection = 'RIGHT';
 
-        if (prevDirection !== 'RIGHT' && this.callbacks.onDirectionChange) {
-            this.callbacks.onDirectionChange('RIGHT', this.state.canMove);
+        this._stateFlags |= PLAYER_STATE.FACING_RIGHT;
+
+        if (!facingRight && this.callbacks.onDirectionChange) {
+            this.callbacks.onDirectionChange('RIGHT', (this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
         }
     }
 
     moveLeft(multiplier = 1) {
-        const prevDirection = this.state.facingDirection;
+        const facingRight = (this._stateFlags & PLAYER_STATE.FACING_RIGHT) !== 0;
         this.velocity.x = -this.physics.speed * multiplier;
-        this.state.facingDirection = 'LEFT';
 
-        if (prevDirection !== 'LEFT' && this.callbacks.onDirectionChange) {
-            this.callbacks.onDirectionChange('LEFT', this.state.canMove);
+        this._stateFlags &= ~PLAYER_STATE.FACING_RIGHT;
+
+        if (facingRight && this.callbacks.onDirectionChange) {
+            this.callbacks.onDirectionChange('LEFT', (this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
         }
     }
 
@@ -395,17 +498,18 @@ export default class PlayerMovementController {
     }
 
     forcedJump(multiplier = 1) {
-        if (!this.state.canMove) {
+        if ((this._stateFlags & PLAYER_STATE.CAN_MOVE) === 0) {
             return false;
         }
 
         this.velocity.y = this.physics.jumpStrength * multiplier;
-        this.state.isJumping = true;
-        this.state.isGrounded = false;
-        this.state.isWallSliding = false;
+
+        this._stateFlags |= PLAYER_STATE.IS_JUMPING;
+        this._stateFlags &= ~PLAYER_STATE.IS_GROUNDED;
+        this._stateFlags &= ~PLAYER_STATE.IS_WALL_SLIDING;
 
         if (this.callbacks.onJump) {
-            this.callbacks.onJump(this.state.canMove);
+            this.callbacks.onJump((this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
         }
         this.state.jumpsRemaining = 2;
 
@@ -413,33 +517,35 @@ export default class PlayerMovementController {
     }
 
     jump(multiplier = 1) {
-        if (!this.state.canMove) {
+        if ((this._stateFlags & PLAYER_STATE.CAN_MOVE) === 0) {
             return false;
         }
 
-        if (this.state.isGrounded || this.state.jumpsRemaining > 0) {
+        if ((this._stateFlags & PLAYER_STATE.IS_GROUNDED) !== 0 || this.state.jumpsRemaining > 0) {
             this.velocity.y = this.physics.jumpStrength * multiplier;
 
-            this.state.isJumping = true;
-            this.state.isGrounded = false;
-            this.state.isWallSliding = false;
+            this._stateFlags |= PLAYER_STATE.IS_JUMPING;
+            this._stateFlags &= ~PLAYER_STATE.IS_GROUNDED;
+            this._stateFlags &= ~PLAYER_STATE.IS_WALL_SLIDING;
 
-            if (!this.state.isGrounded && this.state.jumpsRemaining === 1 && this.callbacks.onDoubleJump) {
-                this.callbacks.onDoubleJump(this.state.canMove);
+            if ((this._stateFlags & PLAYER_STATE.IS_GROUNDED) === 0 && this.state.jumpsRemaining === 1 && this.callbacks.onDoubleJump) {
+                this.callbacks.onDoubleJump((this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
             }
             else if (this.callbacks.onJump) {
-                this.callbacks.onJump(this.state.canMove);
+                this.callbacks.onJump((this._stateFlags & PLAYER_STATE.CAN_MOVE) !== 0);
             }
 
             this.state.jumpsRemaining--;
             return true;
         }
-        else if (this.state.isWallSliding) {
+
+        else if ((this._stateFlags & PLAYER_STATE.IS_WALL_SLIDING) !== 0) {
             this.velocity.y = this.physics.jumpStrength * multiplier;
-            this.velocity.x = this.physics.speed * (this.state.facingDirection === 'RIGHT' ? -1 : 1);
-            this.state.isJumping = true;
-            this.state.isGrounded = false;
-            this.state.isWallSliding = false;
+            this.velocity.x = this.physics.speed * ((this._stateFlags & PLAYER_STATE.FACING_RIGHT) !== 0 ? -1 : 1);
+
+            this._stateFlags |= PLAYER_STATE.IS_JUMPING;
+            this._stateFlags &= ~PLAYER_STATE.IS_GROUNDED;
+            this._stateFlags &= ~PLAYER_STATE.IS_WALL_SLIDING;
             this.state.jumpsRemaining = this.state.maxJumps;
 
             if (this.callbacks.onJump) {
