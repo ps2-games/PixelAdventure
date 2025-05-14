@@ -18,12 +18,12 @@ export default class BoxTrap extends AnimatableEntity {
     }
 
     getBounds() {
-        return {
-            left: this.x,
-            top: this.y + 8,
-            right: this.x + this.width,
-            bottom: this.y + this.height
-        };
+        this._bounds.left = this.x + 4;
+        this._bounds.top = this.y + 2;
+        this._bounds.right = this.x + (this.width - 4);
+        this._bounds.bottom = this.y + this.height - 2;
+
+        return this._bounds;
     }
 
     isPlayerAbove() {
@@ -119,7 +119,5 @@ export default class BoxTrap extends AnimatableEntity {
         image.height = frameHeight;
 
         image.draw(this.x, this.y);
-
-        // this.drawCollisionBox();
     }
 }

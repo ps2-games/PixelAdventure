@@ -22,12 +22,12 @@ export default class SpikeTrap extends Entity {
     }
 
     getBounds() {
-        return {
-            left: this.x,
-            top: this.y + 8,
-            right: this.x + this.width,
-            bottom: this.y + this.height
-        };
+        this._bounds.left = this.x;
+        this._bounds.top = this.y + 8;
+        this._bounds.right = this.x + this.width;
+        this._bounds.bottom = this.y + this.height;
+
+        return this._bounds;
     }
 
     update() {

@@ -44,6 +44,7 @@ export default class TrapManager {
 
             if (trap && trap.isActive) {
                 trap.update(deltaTime);
+                // trap.drawCollisionBox();
             }
             else {
                 this.traps[i] = this.traps[this.traps.length - 1];
