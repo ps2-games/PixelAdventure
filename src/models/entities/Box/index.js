@@ -31,16 +31,19 @@ export default class BoxTrap extends AnimatableEntity {
 
         const playerBounds = this.player.getBounds();
         const boxBounds = this.getBounds();
+        const velocity = this.player.movementController.velocity;
 
         const isComingFromAbove =
             playerBounds.bottom >= boxBounds.top &&
-            this.player.movementController.velocity.y > 0;
+            playerBounds.bottom <= boxBounds.top + 10 &&
+            velocity.y > 0;
 
         if (isComingFromAbove) {
             this.player.movementController.forcedJump();
+            return true;
         }
 
-        return isComingFromAbove;
+        return false;
     }
 
     isPlayerBelow() {

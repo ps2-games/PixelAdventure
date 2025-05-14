@@ -1,7 +1,7 @@
 import TileProperties from "../../../../@types/tile-properties.js";
 
 export default class CollisionDetector {
-    constructor(tileMap, entityWidth, entityHeight, spatialGrid, cellSize, callbacks) {
+    constructor(tileMap, entityWidth, entityHeight, spatialGrid, cellSize, callbacks, traps = []) {
         this.tileMap = tileMap;
         this.entityWidth = entityWidth;
         this.entityHeight = entityHeight;
@@ -20,6 +20,7 @@ export default class CollisionDetector {
         };
         this._positionCache = new Map();
         this._positionCacheSize = 8;
+        this.traps = traps
     }
 
     checkWallCollision(position, velocity, stateManager) {
@@ -212,6 +213,76 @@ export default class CollisionDetector {
         let closestTile = null;
         let closestTileProps = null;
         let minDistance = Infinity;
+
+        for (const trap of this.traps) {
+            if (!trap.isActive) continue;
+
+            const trapBounds = trap.getBounds();
+            if (
+                newX < trapBounds.right &&
+                entityBounds.right > trapBounds.left &&
+                newY < trapBounds.bottom &&
+                entityBounds.bottom > trapBounds.top
+            ) {
+                if (trap.constructor.name === 'BoxTrap') {
+                    if (velocity.y > 0 && entityBounds.bottom >= trapBounds.top) {
+                        trap.hitBox();
+                        continue;
+                    }
+                }
+
+                for (const trap of this.traps) {
+                    if (trap.constructor.name === 'RockHead' && trap.isActive) {
+                        const trapBounds = trap.getBounds();
+                        const prevEntityBottom = position.y + this.entityHeight;
+
+                        const isOnPlatform =
+                            (prevEntityBottom >= trapBounds.top - 2 &&
+                                prevEntityBottom <= trapBounds.top + 10 &&
+                                entityBounds.right > trapBounds.left + 5 &&
+                                newX < trapBounds.right - 5) ||
+                            (velocity.y >= 0 &&
+                                entityBounds.bottom >= trapBounds.top - 2 &&
+                                entityBounds.bottom <= trapBounds.top + 10);
+
+                        if (isOnPlatform) {
+                            newY = trapBounds.top - this.entityHeight;
+                            velocity.y = trap.velocity.y;
+                            position.y = newY;
+
+                            if (entityBounds.right > trapBounds.left + 5 && newX < trapBounds.right - 5) {
+                                position.x += trap.velocity.x;
+                            }
+
+                            return {
+                                tile: {
+                                    x: trapBounds.left,
+                                    y: trapBounds.top,
+                                    width: trapBounds.right - trapBounds.left,
+                                    height: trapBounds.bottom - trapBounds.top
+                                },
+                                tileProps: { collidable: true, isPlatform: true }
+                            };
+                        }
+                    }
+                }
+
+                const distance = direction === 'horizontal'
+                    ? (velocity.x > 0 ? Math.abs(entityBounds.right - trapBounds.left) : Math.abs(trapBounds.right - newX))
+                    : (velocity.y > 0 ? Math.abs(entityBounds.bottom - trapBounds.top) : Math.abs(trapBounds.bottom - newY));
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestTile = {
+                        x: trapBounds.left,
+                        y: trapBounds.top,
+                        width: trapBounds.right - trapBounds.left,
+                        height: trapBounds.bottom - trapBounds.top
+                    };
+                    closestTileProps = { collidable: true, isPlatform: false };
+                }
+            }
+        }
 
         const nearbyTiles = this.#getNearbyCollisionTiles(newX, newY);
 

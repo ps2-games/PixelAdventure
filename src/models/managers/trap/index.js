@@ -37,6 +37,10 @@ export default class TrapManager {
         return trap;
     }
 
+    setPlayer(player) {
+        this.player = player;
+    }
+
     update(deltaTime) {
         const trapsLength = this.traps.length;
         for (let i = 0; i < trapsLength; i++) {

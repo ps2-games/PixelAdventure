@@ -43,7 +43,7 @@ const traps = [
             direction: 'VERTICAL',
             speed: 1.5,
             acceleration: 0.1,
-            maxVelocity: 10
+            maxVelocity: 1.5,
         }
     },
 ]

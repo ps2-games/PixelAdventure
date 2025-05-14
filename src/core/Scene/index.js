@@ -32,9 +32,17 @@ export default class Scene {
 
         if (this.tileMapConfig) {
             this.tileMapRender = new TileMapRender(this.tileMapConfig);
-            this.player = new Player({ initialX: this.initialPlayerPosition.x, initialY: this.initialPlayerPosition.y, tileMap: this.tileMapRender.collisionTiles });
+            this.trapManager = new TrapManager(null, this.tileMapRender.collisionTiles);
+
+            this.player = new Player({
+                initialX: this.initialPlayerPosition.x,
+                initialY: this.initialPlayerPosition.y,
+                tileMap: this.tileMapRender.collisionTiles,
+                traps: this.trapManager.traps
+            });
+
             this.fruitManager = new FruitManager(this.player);
-            this.trapManager = new TrapManager(this.player, this.tileMapRender.collisionTiles);
+            this.trapManager.setPlayer(this.player);
         }
 
         if (this.fruits) {
