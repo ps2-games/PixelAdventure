@@ -32,7 +32,7 @@ export default class Scene {
 
         if (this.tileMapConfig) {
             this.tileMapRender = new TileMapRender(this.tileMapConfig);
-            this.trapManager = new TrapManager(null, this.tileMapRender.collisionTiles);
+            this.trapManager = new TrapManager(null);
 
             this.player = new Player({
                 initialX: this.initialPlayerPosition.x,

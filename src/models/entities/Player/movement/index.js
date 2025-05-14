@@ -12,9 +12,6 @@ export default class PlayerMovementController {
         this._halfEntityWidth = this._entityWidth >> 1;
         this._halfEntityHeight = this._entityHeight >> 1;
 
-        this.isOnMovingPlatform = false;
-        this.currentPlatform = null;
-
         this.position = {
             x: options.initialX || 0,
             y: options.initialY || 0
@@ -113,7 +110,7 @@ export default class PlayerMovementController {
         this.clearCollisionCacheIfNeeded();
 
         if (this.stateManager.canMove) {
-            if (this.velocity.y !== 0 || this.isOnMovingPlatform) {
+            if (this.velocity.y !== 0) {
                 this.handleVerticalCollision(newPosition);
             }
             if (this.velocity.x !== 0) {
@@ -121,48 +118,7 @@ export default class PlayerMovementController {
             }
         }
 
-        if (this.isOnMovingPlatform && this.currentPlatform) {
-            const platformBounds = {
-                left: this.currentPlatform.x,
-                right: this.currentPlatform.x + this.currentPlatform.width,
-                top: this.currentPlatform.y,
-                bottom: this.currentPlatform.y + this.currentPlatform.height
-            };
-            const entityBounds = {
-                left: newPosition.x,
-                right: newPosition.x + this._entityWidth,
-                bottom: newPosition.y + this._entityHeight
-            };
-
-            const isStillOnPlatform =
-                entityBounds.bottom >= platformBounds.top - 2 &&
-                entityBounds.bottom <= platformBounds.top + 10 &&
-                entityBounds.right > platformBounds.left + 5 &&
-                entityBounds.left < platformBounds.right - 5;
-
-            if (isStillOnPlatform) {
-                const platformVelocity = this.getPlatformVelocity(this.currentPlatform);
-                newPosition.x += platformVelocity.x * deltaTime;
-                newPosition.y += platformVelocity.y * deltaTime;
-
-                newPosition.y = platformBounds.top - this._entityHeight;
-                this.velocity.y = platformVelocity.y;
-            } else {
-                this.isOnMovingPlatform = false;
-                this.currentPlatform = null;
-            }
-        }
-
         this.applyFinalPosition(newPosition);
-    }
-
-    getPlatformVelocity(platform) {
-        const trap = this.collisionDetector.traps.find(
-            (t) => t.constructor.name === 'RockHead' &&
-                t.getBounds().left === platform.x &&
-                t.getBounds().top === platform.y
-        );
-        return trap ? trap.velocity : { x: 0, y: 0 };
     }
 
     calculateNewPosition(deltaTime) {
@@ -173,7 +129,7 @@ export default class PlayerMovementController {
     }
 
     clearCollisionCacheIfNeeded() {
-        if (this.isOnMovingPlatform || Math.abs(this.velocity.x) > 5 || Math.abs(this.velocity.y) > 5) {
+        if (Math.abs(this.velocity.x) > 5 || Math.abs(this.velocity.y) > 5) {
             this.collisionDetector.clearCollisionCache();
         }
     }
@@ -188,9 +144,6 @@ export default class PlayerMovementController {
         if (vCollision) {
             if (vCollision.tileProps.isPlatform) {
                 this.handlePlatformCollision(vCollision, newPosition);
-
-                this.isOnMovingPlatform = true;
-                this.currentPlatform = vCollision.tile;
             } else if (vCollision.tileProps.collidable) {
                 this.handleSolidTileCollision(vCollision, newPosition);
             }

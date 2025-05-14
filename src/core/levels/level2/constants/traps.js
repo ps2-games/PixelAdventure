@@ -35,17 +35,6 @@ const traps = [
         x: 452,
         y: 220,
     },
-    {
-        type: TrapTypes.ROCK_HEAD,
-        x: 186,
-        y: 350,
-        options: {
-            direction: 'VERTICAL',
-            speed: 1.5,
-            acceleration: 0.1,
-            maxVelocity: 1.5,
-        }
-    },
 ]
 
 export default traps;
