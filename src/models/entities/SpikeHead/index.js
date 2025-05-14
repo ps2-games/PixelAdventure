@@ -12,6 +12,15 @@ export default class SpikeHead extends AnimatableEntity {
         this.lastBlink = Date.now();
     }
 
+    getBounds() {
+        this._bounds.left = this.x + 7;
+        this._bounds.top = this.y + 7;
+        this._bounds.right = this.x + this.width - 7;
+        this._bounds.bottom = this.y + this.height - 7;
+
+        return this._bounds;
+    }
+
     draw() {
         const { frameWidth, frameHeight, image } = this.getCurrentAnimation();
         const frameX = this.getCurrentFrame() * frameWidth;

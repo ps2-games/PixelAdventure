@@ -224,7 +224,7 @@ export default class RockHead extends AnimatableEntity {
                 const hCollision = this.checkTileCollision(newX, this.y, 'horizontal');
 
                 if (hCollision && hCollision.tileProps.collidable && !hCollision.tileProps.isPlatform) {
-                    const { tile, tileProps } = hCollision;
+                    const { tile } = hCollision;
 
                     if (this.velocity.x > 0) {
                         newX = tile.x - this.width;
