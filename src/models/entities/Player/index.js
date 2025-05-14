@@ -68,7 +68,7 @@ export default class Player extends AnimatableEntity {
       return;
     }
 
-    const movementState = this.movementController.state;
+    const movementState = this.movementController.stateManager;
     const velocity = this.movementController.getVelocity();
     const jumpsRemaining = movementState.jumpsRemaining;
     const currentAnimation = this.getCurrentAnimation();
@@ -160,7 +160,7 @@ export default class Player extends AnimatableEntity {
     const { frameWidth, frameHeight, image } = currentAnimation;
     const frameX = this.getCurrentFrame() * frameWidth;
     const position = this.movementController.getPosition();
-    const isWallSliding = this.movementController.state.isWallSliding;
+    const isWallSliding = this.movementController.stateManager.isWallSliding;
 
     const xOffset = isWallSliding ? (this.flipX ? -5 : 5) : 0;
     const drawX = this.flipX ?
@@ -184,9 +184,9 @@ export default class Player extends AnimatableEntity {
     this.isDying = true;
     this.isDeathAnimationComplete = false;
     this.setAnimation(PlayerAnimationsStates.HIT);
-    this.movementController.state.canMove = false;
+    this.movementController.stateManager.canMove = false;
 
-    const direction = this.movementController.state.facingDirection === 'RIGHT' ? -1 : 1;
+    const direction = this.movementController.stateManager.facingDirection === 'RIGHT' ? -1 : 1;
     this.deathVelocity.x = direction * 2;
     this.deathVelocity.y = -4;
 

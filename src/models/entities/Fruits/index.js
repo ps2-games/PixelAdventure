@@ -44,7 +44,7 @@ export default class Fruit extends AnimatableEntity {
       return;
     }
 
-    if (collector && this.isColliding(collector)) {
+    if (collector && this.isColliding(collector) && !collector.isDying) {
       this.collect(scene);
       this.isCollected = true;
     }
