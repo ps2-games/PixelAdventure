@@ -32,7 +32,6 @@ export default class Player extends AnimatableEntity {
       initialY: options.initialY || 0,
       entity: this,
       tileMap: options.tileMap,
-      traps: options.traps,
       callbacks: {
         onJump,
         onDoubleJump,

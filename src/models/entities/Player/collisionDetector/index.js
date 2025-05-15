@@ -1,7 +1,7 @@
 import TileProperties from "../../../../@types/tile-properties.js";
 
 export default class CollisionDetector {
-    constructor(tileMap, entityWidth, entityHeight, spatialGrid, cellSize, callbacks, traps = []) {
+    constructor(tileMap, entityWidth, entityHeight, spatialGrid, cellSize, callbacks) {
         this.tileMap = tileMap;
         this.entityWidth = entityWidth;
         this.entityHeight = entityHeight;
@@ -20,7 +20,6 @@ export default class CollisionDetector {
         };
         this._positionCache = new Map();
         this._positionCacheSize = 8;
-        this.traps = traps
     }
 
     checkWallCollision(position, velocity, stateManager) {

@@ -53,7 +53,6 @@ export default class PlayerMovementController {
             this.spatialGrid,
             TILE_SIZE << 2,
             this.callbacks,
-            options.traps
         );
 
         this._tempPosition = { x: 0, y: 0 };
