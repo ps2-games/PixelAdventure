@@ -5,11 +5,12 @@ import TrapManager from "../../models/managers/trap/index.js";
 
 export default class Scene {
     constructor({ backgroundConfig, tileMapConfig, fruits, traps, initialPlayerPosition }) {
-        this.backgroundImage = new Image('./assets/background/defaultBg.png')
+        this.backgroundImage = new Image('./assets/background/defaultBg.png');
         this.initialPlayerPosition = initialPlayerPosition;
         this.tileMapConfig = tileMapConfig;
         this.fruits = fruits;
         this.traps = traps;
+        this.isInitialized = false;
 
         this.background = {
             tiles: backgroundConfig ? backgroundConfig.tileMap : null,
@@ -29,28 +30,29 @@ export default class Scene {
         if (this.background.blanketMap) {
             this.blanketTileMap = new TileMapRender(this.background.blanketMap);
         }
-
         if (this.tileMapConfig) {
             this.tileMapRender = new TileMapRender(this.tileMapConfig);
+            if (this.initialPlayerPosition) {
+                this.player = new Player({
+                    initialX: this.initialPlayerPosition.x,
+                    initialY: this.initialPlayerPosition.y,
+                    tileMap: this.tileMapRender.collisionTiles,
+                });
 
-            this.player = new Player({
-                initialX: this.initialPlayerPosition.x,
-                initialY: this.initialPlayerPosition.y,
-                tileMap: this.tileMapRender.collisionTiles,
-            });
+                this.fruitManager = new FruitManager(this.player);
+                this.trapManager = new TrapManager(this.player);
 
-            this.fruitManager = new FruitManager(this.player);
-            this.trapManager = new TrapManager(this.player);
+                if (this.fruits) {
+                    this.fruits.forEach((fruit) => this.fruitManager.addFruit(fruit.type, fruit.x, fruit.y));
+                }
+
+                if (this.traps) {
+                    this.traps.forEach((trap) => this.trapManager.addTrap(trap.type, trap.x, trap.y, trap.options));
+                }
+
+                this.isInitialized = true;
+            }
         }
-
-        if (this.fruits) {
-            this.fruits.forEach((fruit) => this.fruitManager.addFruit(fruit.type, fruit.x, fruit.y))
-        }
-
-        if (this.traps) {
-            this.traps.forEach((trap) => this.trapManager.addTrap(trap.type, trap.x, trap.y, trap.options))
-        }
-
     }
 
     drawBackgroundTile() {
@@ -75,9 +77,13 @@ export default class Scene {
         this.backgroundImage.draw(0, 0);
         this.drawBackgroundTile();
 
-        this.fruitManager.update(deltaTime);
-        this.trapManager.update(deltaTime);
-        this.tileMapRender.render();
+        if (!this.isInitialized) {
+            return;
+        }
+
+        if (this.fruitManager) this.fruitManager.update(deltaTime);
+        if (this.trapManager) this.trapManager.update(deltaTime);
+        if (this.tileMapRender) this.tileMapRender.render();
 
         if (this.player && this.player.shouldRemove()) {
             this.player = null;
@@ -90,5 +96,13 @@ export default class Scene {
         if (this.player) {
             this.player.update(deltaTime);
         }
+    }
+
+    allFruitsCollected() {
+        return this.fruitManager && this.fruitManager.fruits.length === 0;
+    }
+
+    isPlayerAlive() {
+        return !!this.player && !this.player.shouldRemove();
     }
 }
