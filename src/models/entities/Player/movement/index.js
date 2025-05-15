@@ -52,7 +52,7 @@ export default class PlayerMovementController {
             this._entityHeight,
             this.spatialGrid,
             TILE_SIZE << 2,
-            this.callbacks
+            this.callbacks,
         );
 
         this._tempPosition = { x: 0, y: 0 };

@@ -73,11 +73,17 @@ export default class Player extends AnimatableEntity {
     const jumpsRemaining = movementState.jumpsRemaining;
     const currentAnimation = this.getCurrentAnimation();
     const canMove = movementState.canMove;
+    const isOnMovingPlatform = this.movementController.isOnMovingPlatform;
 
     let newState;
 
     if (!canMove) {
       newState = PlayerAnimationsStates.HIT;
+    }
+    else if (isOnMovingPlatform) {
+      newState = velocity.x !== 0 ?
+        PlayerAnimationsStates.RUN :
+        PlayerAnimationsStates.IDLE;
     } else if (velocity.y < 0) {
       newState = jumpsRemaining === 0 ?
         PlayerAnimationsStates.DOUBLE_JUMP :
