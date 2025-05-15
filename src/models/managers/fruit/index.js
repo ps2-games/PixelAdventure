@@ -29,4 +29,8 @@ export default class FruitManager {
             }
         }
     }
+
+    allFruitsCollected() {
+        return this.fruits.length === 0;
+    }
 }
