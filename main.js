@@ -1,15 +1,26 @@
-import Game from './src/core/Game/index.js'
-import level1Config from './src/core/levels/level1/main.js';
-import level2Config from './src/core/levels/level2/main.js';
-import Scene from './src/core/Scene/index.js'
+import { SCREENS } from "./src/constants.js";
+import GameScreen from "./src/GameScreen.js";
+import InputManager from "./src/InputManager.js";
+import MenuScreen from "./src/MenuScreen.js";
+import ScreenManager from "./src/ScreenManager.js";
 
-const initialScene = new Scene(level1Config);
-const game = new Game(initialScene);
+const screenManager = new ScreenManager();
 
-game.levelManager.addLevel("level1", level1Config);
-game.levelManager.addLevel("level2", level2Config);
+screenManager
+    .registerScreens([
+        { id: SCREENS.MENU, class: MenuScreen, default: true },
+        { id: SCREENS.GAME, class: GameScreen }
+    ])
+    .setTransitionSpeed(0.0083)
+    .initialize();
 
-game.levelManager.switchLevel("level1");
+Screen.setFrameCounter(true);
+Screen.setVSync(false);
+Screen.setParam(Screen.DEPTH_TEST_ENABLE, false);
 
+Screen.display(() => {
+    InputManager.update();
 
-game.start();
+    screenManager.update();
+    screenManager.render();
+});
