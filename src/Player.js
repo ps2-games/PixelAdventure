@@ -1,13 +1,13 @@
 import { PlayerMovementConstants } from "./PlayerMovementConfig.js";
 import AnimatableEntity from "./AnimatableEntity.js";
-import PLAYER_ANIMATIONS, { PlayerAnimationsStates } from "./PlayerAnimations.js";
 import PlayerMovementController from "./PlayerMovement.js";
 import InputManager from "./InputManager.js";
 import { BUTTONS } from "./constants.js";
+import { ANIM_DATA, PLAYER_ANIMATION } from "./animationData.js";
 
 export default class Player extends AnimatableEntity {
   constructor(options = {}) {
-    super(options.initialX || 0, options.initialY || 0, 32, 32, PLAYER_ANIMATIONS);
+    super(options.initialX || 0, options.initialY || 0, 32, 32, ANIM_DATA.PLAYER);
 
     this.deathRotation = 0;
     this.deathRotationSpeed = 0;
@@ -20,8 +20,8 @@ export default class Player extends AnimatableEntity {
     this._bounds = { left: 0, top: 0, right: 0, bottom: 0 };
     this._currentState = null;
 
-    const onJump = (canMove) => canMove && this.setAnimation(PlayerAnimationsStates.JUMP);
-    const onDoubleJump = (canMove) => canMove && this.setAnimation(PlayerAnimationsStates.DOUBLE_JUMP);
+    const onJump = (canMove) => canMove && this.setAnimation(PLAYER_ANIMATION.JUMP);
+    const onDoubleJump = (canMove) => canMove && this.setAnimation(PLAYER_ANIMATION.DOUBLE_JUMP);
 
     const onDirectionChange = (direction, canMove) => {
       if (canMove) {
@@ -40,25 +40,25 @@ export default class Player extends AnimatableEntity {
         onLand: (velocity, canMove) => {
           if (canMove) {
             this.setAnimation(velocity.x !== 0 ?
-              PlayerAnimationsStates.RUN :
-              PlayerAnimationsStates.IDLE);
+              PLAYER_ANIMATION.RUN :
+              PLAYER_ANIMATION.IDLE);
           }
         },
         onDirectionChange,
         onWallSlideStart: (canMove) => {
           if (canMove) {
-            this.setAnimation(PlayerAnimationsStates.WALL_JUMP);
+            this.setAnimation(PLAYER_ANIMATION.WALL_JUMP);
           }
         },
         onWallSlideEnd: (canMove) => {
           if (canMove) {
-            this.setAnimation(PlayerAnimationsStates.IDLE);
+            this.setAnimation(PLAYER_ANIMATION.IDLE);
           }
         },
       }
     });
 
-    this.animations[PlayerAnimationsStates.HIT].onAnimationEnd = () => {
+    this.animations[PLAYER_ANIMATION.HIT].onAnimationEnd = () => {
       this.isDeathAnimationComplete = true;
     };
   }
@@ -78,24 +78,24 @@ export default class Player extends AnimatableEntity {
     let newState;
 
     if (!canMove) {
-      newState = PlayerAnimationsStates.HIT;
+      newState = PLAYER_ANIMATION.HIT;
     }
     else if (isOnMovingPlatform) {
       newState = velocity.x !== 0 ?
-        PlayerAnimationsStates.RUN :
-        PlayerAnimationsStates.IDLE;
+        PLAYER_ANIMATION.RUN :
+        PLAYER_ANIMATION.IDLE;
     } else if (velocity.y < 0) {
       newState = jumpsRemaining === 0 ?
-        PlayerAnimationsStates.DOUBLE_JUMP :
-        PlayerAnimationsStates.JUMP;
+        PLAYER_ANIMATION.DOUBLE_JUMP :
+        PLAYER_ANIMATION.JUMP;
     } else if (velocity.y > 0) {
       newState = movementState.isWallSliding ?
-        PlayerAnimationsStates.WALL_JUMP :
-        PlayerAnimationsStates.FALL;
+        PLAYER_ANIMATION.WALL_JUMP :
+        PLAYER_ANIMATION.FALL;
     } else {
       newState = velocity.x !== 0 ?
-        PlayerAnimationsStates.RUN :
-        PlayerAnimationsStates.IDLE;
+        PLAYER_ANIMATION.RUN :
+        PLAYER_ANIMATION.IDLE;
     }
 
     if (currentAnimation !== this.animations[newState]) {
@@ -188,7 +188,7 @@ export default class Player extends AnimatableEntity {
 
     this.isDying = true;
     this.isDeathAnimationComplete = false;
-    this.setAnimation(PlayerAnimationsStates.HIT);
+    this.setAnimation(PLAYER_ANIMATION.HIT);
     this.movementController.stateManager.canMove = false;
 
     const direction = this.movementController.stateManager.facingDirection === 'RIGHT' ? -1 : 1;

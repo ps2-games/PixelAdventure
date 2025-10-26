@@ -1,9 +1,9 @@
 import AnimatableEntity from "./AnimatableEntity.js";
-import SAW_ANIMATIONS from "./SawTrapAnimations.js";
+import { ANIM_DATA } from "./animationData.js";
 
 export default class SawTrap extends AnimatableEntity {
     constructor(x, y, player, options = {}) {
-        super(x, y, 38, 38, SAW_ANIMATIONS);
+        super(x, y, 38, 38, ANIM_DATA.SAW_TRAP);
         this.x = x;
         this.y = y;
         this.player = player;

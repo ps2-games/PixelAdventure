@@ -1,6 +1,4 @@
 export default class AnimatorSystem {
-    constructor() { }
-
     static parallaxToDown(image, parallaxOptions, speed) {
         if (parallaxOptions.backgroundsY[1] === 0) {
             parallaxOptions.backgroundsY[1] = parallaxOptions.screenHeight;
@@ -23,8 +21,20 @@ export default class AnimatorSystem {
         image.draw(0, parallaxOptions.backgroundsY[1]);
     }
 
-    static animationHorizontalSprite(totalFrames, fps, frameWidth, frameHeight, loop, image, scale = 1) {
-        if (image.currentFrame === undefined) image.currentFrame = 0;
+    static animationHorizontalSprite(image) {
+        const {
+            totalFrames,
+            fps = 12,
+            frameWidth,
+            frameHeight,
+            loop = true,
+            scale = 1,
+            startFrame = 0,
+            endFrame = totalFrames - 1,
+            facingLeft = false
+        } = image;
+
+        if (image.currentFrame === undefined) image.currentFrame = startFrame;
         if (image.lastUpdate === undefined) image.lastUpdate = Date.now();
         if (image.frameTimer === undefined) image.frameTimer = 0;
 
@@ -33,109 +43,75 @@ export default class AnimatorSystem {
         image.lastUpdate = now;
 
         const frameTime = 1000 / fps;
-
         image.frameTimer += deltaTime;
 
         if (image.frameTimer >= frameTime) {
             const framesToAdvance = Math.floor(image.frameTimer / frameTime);
             image.currentFrame += framesToAdvance;
-
             image.frameTimer -= framesToAdvance * frameTime;
 
-            if (image.currentFrame >= totalFrames) {
+            if (image.currentFrame > endFrame) {
                 if (loop) {
-                    image.currentFrame = image.currentFrame % totalFrames;
+                    image.currentFrame = startFrame + ((image.currentFrame - startFrame) % (endFrame - startFrame + 1));
                 } else {
-                    image.currentFrame = totalFrames - 1;
+                    image.currentFrame = endFrame;
                 }
             }
         }
 
-        image.startx = image.currentFrame * frameWidth;
-        image.endx = image.currentFrame * frameWidth + frameWidth;
+        const frameIndex = image.currentFrame;
+        image.startx = frameIndex * frameWidth;
+        image.endx = image.startx + frameWidth;
         image.starty = 0;
         image.endy = frameHeight;
-        image.width = frameWidth * scale;
+        image.width = Math.abs(frameWidth * scale) * (facingLeft ? -1 : 1);
         image.height = frameHeight * scale;
     }
 
-    static animationByColumns(framesPerColumn, totalColumns, fps, frameWidth, frameHeight, loop, image, scale = 1) {
-        if (image.currentFrame === undefined) image.currentFrame = 0;
-        if (image.lastUpdate === undefined) image.lastUpdate = Date.now();
-        if (image.frameTimer === undefined) image.frameTimer = 0;
+    static animateWithEasing(frame, targetProps, progressFunction) {
+        if (!frame.start) frame.start = Date.now();
+        if (!frame.duration) frame.duration = 2000;
+        if (!frame.extraDelay) frame.extraDelay = 800;
+        if (!frame.loopEnabled) frame.loopEnabled = false;
+        if (!frame.shouldReverse) frame.shouldReverse = false;
+        if (frame.isReversed === undefined) frame.isReversed = false;
+
+        if (!frame._deltas) {
+            frame._base = {};
+            frame._deltas = {};
+
+            for (const k in targetProps) {
+                frame._base[k] = frame[k] ?? 0;
+                frame._deltas[k] = targetProps[k] - frame._base[k];
+            }
+        }
 
         const now = Date.now();
-        const deltaTime = now - image.lastUpdate;
-        image.lastUpdate = now;
+        const elapsed = now - frame.start;
+        let t = elapsed / frame.duration;
 
-        const frameTime = 1000 / fps;
-        const totalFrames = framesPerColumn * totalColumns;
-
-        image.frameTimer += deltaTime;
-
-        if (image.frameTimer >= frameTime) {
-            const framesToAdvance = Math.floor(image.frameTimer / frameTime);
-            image.currentFrame += framesToAdvance;
-            image.frameTimer -= framesToAdvance * frameTime;
-
-            if (image.currentFrame >= totalFrames) {
-                if (loop) {
-                    image.currentFrame = image.currentFrame % totalFrames;
-                } else {
-                    image.currentFrame = totalFrames - 1;
+        if (t >= 1) {
+            t = 1;
+            if (elapsed >= frame.duration + frame.extraDelay) {
+                if (frame.loopEnabled) {
+                    if (frame.shouldReverse) {
+                        frame.isReversed = !frame.isReversed;
+                        for (const k in frame._deltas) {
+                            frame._deltas[k] *= -1;
+                            frame._base[k] += frame._deltas[k];
+                        }
+                    }
+                    frame.start = Date.now();
+                    t = 0;
                 }
             }
         }
 
-        const currentColumn = Math.floor(image.currentFrame / framesPerColumn);
-        const currentRow = image.currentFrame % framesPerColumn;
-
-        image.startx = currentColumn * frameWidth;
-        image.endx = currentColumn * frameWidth + frameWidth;
-        image.starty = currentRow * frameHeight;
-        image.endy = currentRow * frameHeight + frameHeight;
-
-        image.width = frameWidth * scale;
-        image.height = frameHeight * scale;
-    }
-
-    static animationByRows(framesPerRow, totalRows, fps, frameWidth, frameHeight, loop, image, scale = 1) {
-        if (image.currentFrame === undefined) image.currentFrame = 0;
-        if (image.lastUpdate === undefined) image.lastUpdate = Date.now();
-        if (image.frameTimer === undefined) image.frameTimer = 0;
-
-        const now = Date.now();
-        const deltaTime = now - image.lastUpdate;
-        image.lastUpdate = now;
-
-        const frameTime = 1000 / fps;
-        const totalFrames = framesPerRow * totalRows;
-
-        image.frameTimer += deltaTime;
-
-        if (image.frameTimer >= frameTime) {
-            const framesToAdvance = Math.floor(image.frameTimer / frameTime);
-            image.currentFrame += framesToAdvance;
-            image.frameTimer -= framesToAdvance * frameTime;
-
-            if (image.currentFrame >= totalFrames) {
-                if (loop) {
-                    image.currentFrame = image.currentFrame % totalFrames;
-                } else {
-                    image.currentFrame = totalFrames - 1;
-                }
-            }
+        const p = progressFunction(t);
+        for (const k in frame._deltas) {
+            frame[k] = frame._base[k] + frame._deltas[k] * p;
         }
 
-        const currentRow = Math.floor(image.currentFrame / framesPerRow);
-        const currentColumn = image.currentFrame % framesPerRow;
-
-        image.startx = currentColumn * frameWidth;
-        image.endx = currentColumn * frameWidth + frameWidth;
-        image.starty = currentRow * frameHeight;
-        image.endy = currentRow * frameHeight + frameHeight;
-
-        image.width = frameWidth * scale;
-        image.height = frameHeight * scale;
+        return t >= 1 && !frame.loopEnabled;
     }
 }

@@ -1,12 +1,18 @@
-import { FruitsAnimationsStates } from "./FruitsAnimationsState.js";
 import AnimatableEntity from "./AnimatableEntity.js";
 import Animation from "./animation.js";
+
+
+const FRUIT_ANIMATION_STATE = {
+  IDLE: 'IDLE',
+  COLLECTED: 'COLLECTED'
+};
+
 
 export default class Fruit extends AnimatableEntity {
 
   constructor(fruit, xPosition, yPosition, collectedSound) {
     super(xPosition, yPosition, 32, 32, {
-      [FruitsAnimationsStates.IDLE]: new Animation(
+      [FRUIT_ANIMATION_STATE.IDLE]: new Animation(
         `fruits/${fruit}.png`,
         11,
         50,
@@ -14,7 +20,7 @@ export default class Fruit extends AnimatableEntity {
         32,
         true
       ),
-      [FruitsAnimationsStates.COLLECTED]: new Animation(
+      [FRUIT_ANIMATION_STATE.COLLECTED]: new Animation(
         `fruits/Collected.png`,
         6,
         50,
@@ -33,7 +39,7 @@ export default class Fruit extends AnimatableEntity {
 
     scene.fruitSlot = (scene.fruitSlot + 1) & (scene.fruitSlotSize - 1);
 
-    this.setAnimation(FruitsAnimationsStates.COLLECTED);
+    this.setAnimation(FRUIT_ANIMATION_STATE.COLLECTED);
     this.isCollected = true;
   }
 

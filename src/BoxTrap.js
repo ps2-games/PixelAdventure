@@ -1,9 +1,9 @@
 import AnimatableEntity from "./AnimatableEntity.js";
-import BOX_ANIMATIONS, { BoxAnimationState } from "./BoxTrapAnimations.js";
+import { ANIM_DATA, BOX_TRAP_ANIMATION } from "./animationData.js";
 
 export default class BoxTrap extends AnimatableEntity {
     constructor(x, y, player) {
-        super(x, y, 28, 26, BOX_ANIMATIONS)
+        super(x, y, 28, 26, ANIM_DATA.BOX_TRAP)
         this.x = x;
         this.y = y;
         this.player = player;
@@ -67,7 +67,7 @@ export default class BoxTrap extends AnimatableEntity {
             this.state.isHit = true;
             this.state.isIdle = false;
 
-            this.animations[BoxAnimationState.HIT].onAnimationEnd = () => {
+            this.animations[BOX_TRAP_ANIMATION.HIT].onAnimationEnd = () => {
                 this.state.isHit = false;
                 this.state.isIdle = true;
             };
@@ -75,7 +75,7 @@ export default class BoxTrap extends AnimatableEntity {
 
             if (this.life <= 0) {
                 this.state.isBroken = true;
-                this.animations[BoxAnimationState.BREAK].onAnimationEnd = () => {
+                this.animations[BOX_TRAP_ANIMATION.BREAK].onAnimationEnd = () => {
                     this.isActive = false;
                 };
             }
@@ -88,17 +88,17 @@ export default class BoxTrap extends AnimatableEntity {
 
     onChangeState() {
         if (this.state.isBroken) {
-            this.setAnimation(BoxAnimationState.BREAK);
+            this.setAnimation(BOX_TRAP_ANIMATION.BREAK);
             return;
         }
 
         if (this.state.isHit) {
-            this.setAnimation(BoxAnimationState.HIT);
+            this.setAnimation(BOX_TRAP_ANIMATION.HIT);
             return;
         }
 
         if (this.state.isIdle) {
-            this.setAnimation(BoxAnimationState.IDLE);
+            this.setAnimation(BOX_TRAP_ANIMATION.IDLE);
             return;
         }
     }

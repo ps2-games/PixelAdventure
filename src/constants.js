@@ -1,6 +1,8 @@
 const ASSETS_PATH = Object.freeze({
     Backgrounds: './assets/images/background',
     Sheets: './assets/images/sheets',
+    Fruits: './assets/images/sheets/fruits',
+    NinjaFrog: './assets/images/sheets/ninjaFrog',
     Sounds: './assets/sounds',
     SFX: './assets/sounds/sfx',
     TileSet: './assets/images/tileset',
