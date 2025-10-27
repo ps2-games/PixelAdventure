@@ -1,4 +1,7 @@
-const ASSETS_PATH = Object.freeze({
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
+const TILE_SIZE = 16;
+const BACKGROUND_SIZE = 64;
+const ASSETS_PATH = {
     Backgrounds: './assets/images/background',
     Sheets: './assets/images/sheets',
     Fruits: './assets/images/sheets/fruits',
@@ -9,15 +12,24 @@ const ASSETS_PATH = Object.freeze({
     UI: './assets/images/ui',
     VFX: './assets/images/vfx',
     TRAPS: './assets/images/sheets/traps'
-})
-const SCREENS = Object.freeze({
+}
+const SCREENS = {
     MENU: 'MENU',
     GAME: 'GAME'
-})
+}
+const PLAYERS_PORT = {
+    PLAYER_ONE: 0,
+    PLAYER_TWO: 1
+}
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
-const TILE_SIZE = 16;
-const BACKGROUND_SIZE = 64;
+const PLAYER_MOVEMENT = {
+    DEFAULT_GRAVITY: 0.5,
+    DEFAULT_JUMP_STRENGTH: -8,
+    DEFAULT_JUMPS: 2,
+    DEFAULT_SPEED: 6,
+    WALL_SLIDE_SPEED: 1,
+    MAX_Y_VELOCITY: 10
+};
 
 const TILE_TYPES = {
     BACKGROUND: 'background',
@@ -27,14 +39,12 @@ const TILE_TYPES = {
     DECORATION: 'decoration',
     WALL: 'wall',
 };
-
 const TRAP_TYPES = {
     SPIKE: 'spike',
     SPIKE_HEAD: 'spike_head',
     BOX: 'box',
     SAW: 'saw'
 };
-
 const TILE_PROPERTIES = {
     [TILE_TYPES.GROUND]: { collidable: true, walkable: true, isPlatform: false },
     [TILE_TYPES.NON_COLLIDABLE]: { collidable: false, walkable: false, isPlatform: false },
@@ -44,7 +54,7 @@ const TILE_PROPERTIES = {
     [TILE_TYPES.BACKGROUND]: { collidable: false, walkable: false, isPlatform: false },
 };
 
-const BUTTONS = Object.freeze({
+const BUTTONS = {
     SELECT: 'SELECT',
     START: 'START',
     UP: 'UP',
@@ -61,7 +71,7 @@ const BUTTONS = Object.freeze({
     R2: 'R2',
     L3: 'L3',
     R3: 'R3'
-});
+};
 
 export {
     ASSETS_PATH,
@@ -73,5 +83,7 @@ export {
     BUTTONS,
     TILE_PROPERTIES,
     TILE_TYPES,
-    TRAP_TYPES
+    PLAYERS_PORT,
+    TRAP_TYPES,
+    PLAYER_MOVEMENT
 }

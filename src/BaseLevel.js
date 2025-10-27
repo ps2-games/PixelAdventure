@@ -1,7 +1,7 @@
 import FruitManager from "./FruitManager.js";
-import Player from "./Player.js";
 import TrapManager from "./TrapManager.js";
 import TileMapRender from "./TileMapRender.js";
+import Player from "./PlayerV2.js";
 
 export default class BaseLevel {
     constructor(config) {

@@ -54,7 +54,7 @@ export default class ScreenManager {
 
     changeScreen(screenId, useTransition = true, callback = null) {
         if (!this.screens.has(screenId)) {
-            console.error(`Tela '${screenId}' não encontrada!`);
+            console.error(`Tela '${screenId}' nÃ£o encontrada!`);
             return false;
         }
 

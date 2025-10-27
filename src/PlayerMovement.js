@@ -1,4 +1,4 @@
-import { SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE } from "./constants.js";
+import { TILE_SIZE } from "./constants.js";
 import CollisionDetector from "./PlayerColissionDetector.js";
 import { PlayerMovementConstants } from "./PlayerMovementConfig.js";
 import PlayerStateManager, { PLAYER_STATE } from "./PlayerStateManager.js";
@@ -10,30 +10,6 @@ export default class PlayerMovementController {
         this._entityHeight = options.entity?.height || 32;
         this._halfEntityWidth = this._entityWidth >> 1;
         this._halfEntityHeight = this._entityHeight >> 1;
-
-        this.position = {
-            x: options.initialX || 0,
-            y: options.initialY || 0
-        };
-
-        this.velocity = {
-            x: 0,
-            y: 0
-        };
-
-        this.physics = {
-            gravity: PlayerMovementConstants.DEFAULT_GRAVITY,
-            jumpStrength: PlayerMovementConstants.DEFAULT_JUMP_STRENGTH,
-            speed: PlayerMovementConstants.DEFAULT_SPEED,
-            maxVelocityY: 10
-        };
-
-        this.constraints = {
-            minX: 0,
-            maxX: SCREEN_WIDTH - this._entityWidth,
-            maxY: SCREEN_HEIGHT - this._entityHeight,
-            minY: options.minY,
-        };
 
         let initialStateFlags = PLAYER_STATE.CAN_MOVE | PLAYER_STATE.FACING_RIGHT;
         if (options.affectedByGravity !== false) {

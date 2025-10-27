@@ -1,4 +1,4 @@
-import AnimatorSystem from "./AnimatorSystem.js";
+import { parallaxToDown } from "./animationEngine.js";
 import Assets from "./assets.js";
 import { ASSETS_PATH, SCREEN_HEIGHT } from "./constants.js";
 
@@ -31,7 +31,7 @@ export default class BaseScreen {
     }
 
     renderBackground() {
-        AnimatorSystem.parallaxToDown(this.background, this.parallaxState, 24)
+        parallaxToDown(this.background, this.parallaxState, 24)
     }
 
     setScreenManager(manager) {

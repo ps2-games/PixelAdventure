@@ -26,64 +26,57 @@ export const FRUIT_ANIMATION_STATE = {
     COLLECTED: 'COLLECTED'
 };
 
-export const ANIM_DATA = Object.freeze({
+export const ANIM_DATA = {
     PLAYER: {
-        [PLAYER_ANIMATION.IDLE]: {
+        [PLAYER_ANIMATION.IDLE]: Assets.image(`${ASSETS_PATH.NinjaFrog}/Idle.png`, {
             totalFrames: 11,
+            fps: 16,
+            frameWidth: 32,
+            frameHeight: 32,
+            loop: true,
+        }),
+        [PLAYER_ANIMATION.RUN]: Assets.image(`${ASSETS_PATH.NinjaFrog}/Run.png`, {
+            totalFrames: 12,
             fps: 12,
             frameWidth: 32,
             frameHeight: 32,
             loop: true,
-            image: Assets.image(`${ASSETS_PATH.NinjaFrog}/Idle.png`)
-        },
-        [PLAYER_ANIMATION.RUN]: {
-            totalFrames: 12,
-            fps: 6,
-            frameWidth: 32,
-            frameHeight: 32,
-            loop: true,
-            image: Assets.image(`${ASSETS_PATH.NinjaFrog}/Run.png`)
-        },
-        [PLAYER_ANIMATION.JUMP]: {
+        }),
+        [PLAYER_ANIMATION.JUMP]: Assets.image(`${ASSETS_PATH.NinjaFrog}/Jump.png`, {
             totalFrames: 1,
             fps: 12,
             frameWidth: 32,
             frameHeight: 32,
             loop: false,
-            image: Assets.image(`${ASSETS_PATH.NinjaFrog}/Jump.png`)
-        },
-        [PLAYER_ANIMATION.DOUBLE_JUMP]: {
+        }),
+        [PLAYER_ANIMATION.DOUBLE_JUMP]: Assets.image(`${ASSETS_PATH.NinjaFrog}/Double_Jump.png`, {
             totalFrames: 6,
             fps: 12,
             frameWidth: 32,
             frameHeight: 32,
             loop: true,
-            image: Assets.image(`${ASSETS_PATH.NinjaFrog}/Double_Jump.png`)
-        },
-        [PLAYER_ANIMATION.FALL]: {
+        }),
+        [PLAYER_ANIMATION.FALL]: Assets.image(`${ASSETS_PATH.NinjaFrog}/Fall.png`, {
             totalFrames: 1,
             fps: 12,
             frameWidth: 32,
             frameHeight: 32,
             loop: false,
-            image: Assets.image(`${ASSETS_PATH.NinjaFrog}/Fall.png`)
-        },
-        [PLAYER_ANIMATION.WALL_JUMP]: {
+        }),
+        [PLAYER_ANIMATION.WALL_JUMP]: Assets.image(`${ASSETS_PATH.NinjaFrog}/Wall_Jump.png`, {
             totalFrames: 5,
             fps: 12,
             frameWidth: 32,
             frameHeight: 32,
             loop: true,
-            image: Assets.image(`${ASSETS_PATH.NinjaFrog}/Wall_Jump.png`)
-        },
-        [PLAYER_ANIMATION.HIT]: {
+        }),
+        [PLAYER_ANIMATION.HIT]: Assets.image(`${ASSETS_PATH.NinjaFrog}/Hit.png`, {
             totalFrames: 7,
             fps: 12,
             frameWidth: 32,
             frameHeight: 32,
             loop: false,
-            image: Assets.image(`${ASSETS_PATH.NinjaFrog}/Hit.png`)
-        }
+        }),
     },
     BOX_TRAP: {
         [BOX_TRAP_ANIMATION.IDLE]: {
@@ -121,4 +114,4 @@ export const ANIM_DATA = Object.freeze({
             image: Assets.image(`${ASSETS_PATH.TRAPS}/Saw/On.png`)
         }
     },
-})
+}

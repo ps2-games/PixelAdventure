@@ -3,9 +3,14 @@ const soundCache = new Map();
 const fontCache = new Map();
 
 export default class Assets {
-    static image(path) {
+    static image(path, animConfig = {}) {
         if (imageCache.has(path)) return imageCache.get(path).asset;
         const img = new Image(path);
+
+        if (animConfig && Object.keys(animConfig).length > 0) {
+            Object.assign(img, animConfig);
+        }
+
         img.lock();
         imageCache.set(path, { asset: img, ref: 1 });
         return img;

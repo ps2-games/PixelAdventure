@@ -1,5 +1,5 @@
 import Assets from "./assets.js";
-import { ASSETS_PATH, BUTTONS, SCREEN_HEIGHT, SCREEN_WIDTH, SCREENS } from "./constants.js";
+import { ASSETS_PATH, BUTTONS, PLAYERS_PORT, SCREEN_HEIGHT, SCREEN_WIDTH, SCREENS } from "./constants.js";
 import InputManager from "./InputManager.js";
 import BaseScreen from "./BaseScreen.js";
 
@@ -24,7 +24,7 @@ export default class MenuScreen extends BaseScreen {
         this.logo.draw(SCREEN_WIDTH / 2 - this.logo.width / 2, 80);
 
 
-        if (InputManager.player(0).justPressed(BUTTONS.CROSS)) {
+        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).justPressed(BUTTONS.CROSS)) {
             this.screenManager.changeScreen(SCREENS.GAME, true)
         }
     }
