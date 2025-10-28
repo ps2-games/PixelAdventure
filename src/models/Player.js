@@ -13,6 +13,7 @@ export default class Player {
 
         this.isLiving = true;
         this.deathRotation = 0;
+        this.facingLeft = false;
 
         this.state = PLAYER_ANIMATION.IDLE
 
@@ -116,20 +117,21 @@ export default class Player {
     }
 
     fixLeftPosition() {
-        return this.currentAnimation.facingLeft ? this.position.x + Math.abs(this.currentAnimation.width) : this.position.x;
+        return this.facingLeft ? this.position.x + Math.abs(this.currentAnimation.width) : this.position.x;
     }
 
     applyGravity() {
-        this.velocity.y += PLAYER_MOVEMENT.DEFAULT_GRAVITY * DELTA_TIME;
+        const gravity = this.isLiving ? PLAYER_MOVEMENT.DEFAULT_GRAVITY : PLAYER_MOVEMENT.DEFAULT_GRAVITY / 32;
+        this.velocity.y += gravity * DELTA_TIME;
     }
 
     moveRight() {
-        this.currentAnimation.facingLeft = false;
+        this.facingLeft = false;
         this.velocity.x = PLAYER_MOVEMENT.DEFAULT_SPEED * DELTA_TIME
     }
 
     moveLeft() {
-        this.currentAnimation.facingLeft = true;
+        this.facingLeft = true;
         this.velocity.x = -PLAYER_MOVEMENT.DEFAULT_SPEED * DELTA_TIME;
     }
 
@@ -144,9 +146,9 @@ export default class Player {
 
         this.isLiving = false;
 
-        const direction = this.currentAnimation.facingLeft ? -1 : 1;
-        this.velocity.x = direction * 2;
-        this.velocity.y = -4;
+        const direction = this.facingLeft ? 1 : -1;
+        this.velocity.x = direction * 2 * DELTA_TIME;
+        this.velocity.y = -12 * DELTA_TIME;
 
         this.deathRotation = 0;
         const rotationSpeed = (Math.random() > 0.5 ? 1 : -1) * 0.05;
@@ -169,7 +171,7 @@ export default class Player {
             this.jump();
         }
 
-        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).pressed(BUTTONS.CIRCLE)) {
+        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).justPressed(BUTTONS.CIRCLE)) {
             this.die();
         }
     }
@@ -225,8 +227,9 @@ export default class Player {
 
         animationHorizontalSprite(this.currentAnimation);
         this.currentAnimation.angle = this.deathRotation;
+        this.currentAnimation.facingLeft = this.facingLeft
         this.currentAnimation.draw(drawX, this.position.y);
-        this.drawCollisionBox();
+        // this.drawCollisionBox();
     }
 
     groundClamp() {
