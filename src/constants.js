@@ -5,7 +5,7 @@ const ASSETS_PATH = {
     Backgrounds: './assets/images/background',
     Sheets: './assets/images/sheets',
     Fruits: './assets/images/sheets/fruits',
-    NinjaFrog: './assets/images/sheets/ninjaFrog',
+    Characters: './assets/images/sheets/characters',
     Sounds: './assets/sounds',
     SFX: './assets/sounds/sfx',
     TileSet: './assets/images/tileset',
@@ -23,10 +23,10 @@ const PLAYERS_PORT = {
 }
 
 const PLAYER_MOVEMENT = {
-    DEFAULT_GRAVITY: 0.5,
-    DEFAULT_JUMP_STRENGTH: -8,
+    DEFAULT_GRAVITY: 0.4,
+    DEFAULT_JUMP_STRENGTH: -1,
     DEFAULT_JUMPS: 2,
-    DEFAULT_SPEED: 6,
+    DEFAULT_SPEED: 16,
     WALL_SLIDE_SPEED: 1,
     MAX_Y_VELOCITY: 10
 };
@@ -73,6 +73,8 @@ const BUTTONS = {
     R3: 'R3'
 };
 
+const DELTA_TIME = 16.67 / 1000
+
 export {
     ASSETS_PATH,
     SCREENS,
@@ -85,5 +87,6 @@ export {
     TILE_TYPES,
     PLAYERS_PORT,
     TRAP_TYPES,
+    DELTA_TIME,
     PLAYER_MOVEMENT
 }
