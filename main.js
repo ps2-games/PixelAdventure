@@ -1,8 +1,8 @@
-import InputManager from "./src/input.js";
-import MenuScreen from "./src/Screens/MenuScreen.js";
-import ScreenManager from "./src/Managers/ScreenManager.js";
-import { SCREENS } from "./src/constants.js";
-import GameScreen from "./src/Screens/GameScreen.js";
+import InputManager from "./src/shared/input.js";
+import MenuScreen from "./src/screens/MenuScreen.js";
+import ScreenManager from "./src/modules/screenManager.js";
+import { SCREENS } from "./src/shared/constants.js";
+import GameScreen from "./src/screens/gameScreen.js";
 
 const screenManager = new ScreenManager();
 
