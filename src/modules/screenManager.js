@@ -1,4 +1,4 @@
-import Transition from "../VFX/Transition.js";
+import Transition from "../shared/transition.js";
 
 export default class ScreenManager {
     constructor() {

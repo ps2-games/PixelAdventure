@@ -1,6 +1,6 @@
-import { parallaxToDown } from "../animationEngine.js";
-import Assets from "../assets.js";
-import { ASSETS_PATH, SCREEN_HEIGHT } from "../constants.js";
+import { parallaxToDown } from "../shared/animation.js";
+import Assets from "../shared/assets.js";
+import { ASSETS_PATH, SCREEN_HEIGHT } from "../shared/constants.js";
 
 const BACKGROUNDS = [
     `${ASSETS_PATH.Backgrounds}/blue.png`,

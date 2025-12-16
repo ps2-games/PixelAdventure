@@ -1,7 +1,7 @@
 import Assets from "../assets.js";
-import { ASSETS_PATH, BUTTONS, PLAYERS_PORT, SCREEN_HEIGHT, SCREEN_WIDTH, SCREENS } from "../constants.js";
+import { ASSETS_PATH, BUTTONS, PLAYERS_PORT, SCREEN_HEIGHT, SCREEN_WIDTH, SCREENS } from "../shared/constants.js";
 import InputManager from "../input.js";
-import BaseScreen from "./BaseScreen.js";
+import BaseScreen from "./baseScreen.js";
 
 export default class MenuScreen extends BaseScreen {
     constructor() {

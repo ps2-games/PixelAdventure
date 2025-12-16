@@ -1,8 +1,7 @@
-import { PLAYER_ANIMATION } from "../animationData.js";
-import { animationHorizontalSprite } from "../animationEngine.js";
-import Assets from "../assets.js";
-import { ASSETS_PATH, BUTTONS, DELTA_TIME, PLAYER_MOVEMENT, PLAYERS_PORT, SCREEN_HEIGHT, SCREEN_WIDTH } from "../constants.js";
-import InputManager from "../input.js";
+import { PLAYER_ANIMATION, ASSETS_PATH, BUTTONS, DELTA_TIME, PLAYER_MOVEMENT, PLAYERS_PORT, SCREEN_HEIGHT, SCREEN_WIDTH } from "../shared/constants.js";
+import { animationHorizontalSprite } from "../shared/animation.js";
+import Assets from "../shared/assets.js";
+import InputManager from "../shared/input.js";
 
 export default class Player {
     constructor(options = {}) {
@@ -116,10 +115,6 @@ export default class Player {
         return this.velocity.y < PLAYER_MOVEMENT.MAX_Y_VELOCITY
     }
 
-    fixLeftPosition() {
-        return this.facingLeft ? this.position.x + Math.abs(this.currentAnimation.width) : this.position.x;
-    }
-
     applyGravity() {
         const gravity = this.isLiving ? PLAYER_MOVEMENT.DEFAULT_GRAVITY : PLAYER_MOVEMENT.DEFAULT_GRAVITY / 32;
         this.velocity.y += gravity * DELTA_TIME;
@@ -223,12 +218,10 @@ export default class Player {
     draw() {
         if (this.shouldRemove()) return;
 
-        const drawX = this.fixLeftPosition();
-
         animationHorizontalSprite(this.currentAnimation);
         this.currentAnimation.angle = this.deathRotation;
         this.currentAnimation.facingLeft = this.facingLeft
-        this.currentAnimation.draw(drawX, this.position.y);
+        this.currentAnimation.draw(Math.fround(this.position.x - this.currentAnimation.width / 2), this.position.y);
         // this.drawCollisionBox();
     }
 

@@ -1,6 +1,4 @@
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
-const TILE_SIZE = 16;
-const BACKGROUND_SIZE = 64;
+// Assets
 const ASSETS_PATH = {
     Backgrounds: './assets/images/background',
     Sheets: './assets/images/sheets',
@@ -13,15 +11,12 @@ const ASSETS_PATH = {
     VFX: './assets/images/vfx',
     TRAPS: './assets/images/sheets/traps'
 }
-const SCREENS = {
-    MENU: 'MENU',
-    GAME: 'GAME'
-}
+
+// Player
 const PLAYERS_PORT = {
     PLAYER_ONE: 0,
     PLAYER_TWO: 1
 }
-
 const PLAYER_MOVEMENT = {
     DEFAULT_GRAVITY: 0.4,
     DEFAULT_JUMP_STRENGTH: -1,
@@ -30,7 +25,39 @@ const PLAYER_MOVEMENT = {
     WALL_SLIDE_SPEED: 1,
     MAX_Y_VELOCITY: 10
 };
+const PLAYER_ANIMATION = {
+    IDLE: 'IDLE',
+    RUN: 'RUN',
+    JUMP: 'JUMP',
+    FALL: 'FALL',
+    DOUBLE_JUMP: 'DOUBLE_JUMP',
+    WALL_JUMP: 'WALL_JUMP',
+    HIT: "HIT",
+};
 
+// Traps
+const TRAP_TYPES = {
+    SPIKE: 'spike',
+    SPIKE_HEAD: 'spike_head',
+    BOX: 'box',
+    SAW: 'saw'
+};
+const BOX_TRAP_ANIMATION = {
+    IDLE: 'IDLE',
+    HIT: 'HIT',
+    BREAK: 'BREAK'
+};
+const SAW_TRAP_ANIMATIONS = {
+    ON: 'ON',
+};
+const FRUIT_ANIMATION_STATE = {
+    IDLE: 'IDLE',
+    COLLECTED: 'COLLECTED'
+};
+
+//Tiles
+const TILE_SIZE = 16;
+const BACKGROUND_SIZE = 64;
 const TILE_TYPES = {
     BACKGROUND: 'background',
     GROUND: 'ground',
@@ -38,12 +65,6 @@ const TILE_TYPES = {
     PLATFORM: 'platform',
     DECORATION: 'decoration',
     WALL: 'wall',
-};
-const TRAP_TYPES = {
-    SPIKE: 'spike',
-    SPIKE_HEAD: 'spike_head',
-    BOX: 'box',
-    SAW: 'saw'
 };
 const TILE_PROPERTIES = {
     [TILE_TYPES.GROUND]: { collidable: true, walkable: true, isPlatform: false },
@@ -54,26 +75,14 @@ const TILE_PROPERTIES = {
     [TILE_TYPES.BACKGROUND]: { collidable: false, walkable: false, isPlatform: false },
 };
 
-const BUTTONS = {
-    SELECT: 'SELECT',
-    START: 'START',
-    UP: 'UP',
-    RIGHT: 'RIGHT',
-    DOWN: 'DOWN',
-    LEFT: 'LEFT',
-    TRIANGLE: 'TRIANGLE',
-    CIRCLE: 'CIRCLE',
-    CROSS: 'CROSS',
-    SQUARE: 'SQUARE',
-    L1: 'L1',
-    R1: 'R1',
-    L2: 'L2',
-    R2: 'R2',
-    L3: 'L3',
-    R3: 'R3'
-};
-
-const DELTA_TIME = 16.67 / 1000
+//General Config
+const SCREENS = {
+    MENU: 'MENU',
+    GAME: 'GAME'
+}
+const TARGET_FPS = 60;
+const DELTA_TIME = Math.fround(1.0 / TARGET_FPS);
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
 
 export {
     ASSETS_PATH,
@@ -82,11 +91,14 @@ export {
     SCREEN_WIDTH,
     TILE_SIZE,
     BACKGROUND_SIZE,
-    BUTTONS,
     TILE_PROPERTIES,
     TILE_TYPES,
     PLAYERS_PORT,
     TRAP_TYPES,
     DELTA_TIME,
-    PLAYER_MOVEMENT
+    PLAYER_MOVEMENT,
+    BOX_TRAP_ANIMATION,
+    SAW_TRAP_ANIMATIONS,
+    FRUIT_ANIMATION_STATE,
+    PLAYER_ANIMATION
 }

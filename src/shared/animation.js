@@ -1,4 +1,4 @@
-export function parallaxToDown(image, parallaxOptions, speed) {
+function parallaxToDown(image, parallaxOptions, speed) {
     if (parallaxOptions.backgroundsY[1] === 0) {
         parallaxOptions.backgroundsY[1] = parallaxOptions.screenHeight;
     }
@@ -19,8 +19,7 @@ export function parallaxToDown(image, parallaxOptions, speed) {
     image.draw(0, parallaxOptions.backgroundsY[0]);
     image.draw(0, parallaxOptions.backgroundsY[1]);
 }
-
-export function animationHorizontalSprite(image) {
+function animationHorizontalSprite(image) {
     const {
         totalFrames,
         fps = 12,
@@ -61,15 +60,22 @@ export function animationHorizontalSprite(image) {
     }
 
     const frameIndex = image.currentFrame;
-    image.startx = frameIndex * frameWidth;
-    image.endx = image.startx + frameWidth;
+    
+    image.width = frameWidth * scale;
+    image.height = frameHeight * scale;
+    
+    if (facingLeft) {
+        image.startx = (frameIndex + 1) * frameWidth;
+        image.endx = frameIndex * frameWidth;
+    } else {
+        image.startx = frameIndex * frameWidth;
+        image.endx = image.startx + frameWidth;
+    }
+    
     image.starty = 0;
     image.endy = frameHeight;
-    image.width = Math.abs(frameWidth * scale) * (facingLeft ? -1 : 1);
-    image.height = frameHeight * scale;
 }
-
-export function animateWithEasing(frame, targetProps, progressFunction) {
+function animateWithEasing(frame, targetProps, progressFunction) {
     if (!frame.start) frame.start = Date.now();
     if (!frame.duration) frame.duration = 2000;
     if (!frame.extraDelay) frame.extraDelay = 800;
@@ -114,4 +120,10 @@ export function animateWithEasing(frame, targetProps, progressFunction) {
     }
 
     return t >= 1 && !frame.loopEnabled;
+}
+
+export {
+    parallaxToDown,
+    animateWithEasing,
+    animationHorizontalSprite
 }

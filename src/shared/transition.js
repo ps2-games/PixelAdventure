@@ -1,5 +1,5 @@
-import Assets from "../assets.js";
-import { ASSETS_PATH, SCREEN_WIDTH, SCREEN_HEIGHT } from "../constants.js";
+import Assets from "../shared/assets.js";
+import { ASSETS_PATH, SCREEN_WIDTH, SCREEN_HEIGHT } from "../shared/constants.js";
 
 export default class Transition {
     constructor() {
