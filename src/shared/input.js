@@ -75,11 +75,11 @@ class Input {
         );
 
         return {
-            pressed: b => this.#run(() => player.pad.pressed(Pads[b]), false),
-            justPressed: b => this.#run(() => player.pad.justPressed(Pads[b]), false),
+            pressed: b => this.#run(() => player.pad.pressed(b), false),
+            justPressed: b => this.#run(() => player.pad.justPressed(b), false),
             leftStick: () => stick(player.pad.lx, player.pad.ly),
             rightStick: () => stick(player.pad.rx, player.pad.ry),
-            pressure: b => this.#run(() => Pads.getPressure(p, Pads[b]), 0),
+            pressure: b => this.#run(() => Pads.getPressure(p, b), 0),
             rumble: (big, small) => this.#run(() => Pads.rumble(p, big, small)),
             isActive: () => true,
             getType: () => player.type,

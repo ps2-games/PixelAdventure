@@ -1,4 +1,4 @@
-import Player from "../modules/player.js";
+import Player from "../modules/player/player.js";
 import BaseScreen from "./baseScreen.js";
 
 export default class GameScreen extends BaseScreen {
