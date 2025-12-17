@@ -1,8 +1,6 @@
 import { DELTA_TIME, PLAYER_MOVEMENT, PLAYERS_PORT } from "../../shared/constants.js";
 import InputManager from "../../shared/input.js";
 import Collision from "../../shared/collision.js";
-import Assets from "../../shared/assets.js";
-import audio from "../../shared/audio.js";
 
 export default class Movement2D {
     constructor(initialX, initialY) {
