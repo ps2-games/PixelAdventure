@@ -10,7 +10,6 @@ export default class GameScreen extends BaseScreen {
         this.levelColliders = [];
         this.debugMode = false;
         
-        // Cache para otimização
         this.levelCache = {
             grounds: null,
             platforms: null,
@@ -29,7 +28,6 @@ export default class GameScreen extends BaseScreen {
             character: 0
         });
 
-        // Cachear layers do nível uma única vez
         this.cacheLevelLayers();
     }
 
@@ -42,7 +40,6 @@ export default class GameScreen extends BaseScreen {
         this.levelColliders.forEach(id => Collision.unregister(id));
         this.levelColliders = [];
         
-        // Limpar cache
         this.levelCache = {
             grounds: null,
             platforms: null,
@@ -211,7 +208,6 @@ export default class GameScreen extends BaseScreen {
             }
         }
 
-        // Desenhar tetos
         if (ceilings) {
             for (let i = 0; i < ceilings.length; i++) {
                 const c = ceilings[i];
@@ -223,10 +219,8 @@ export default class GameScreen extends BaseScreen {
     render() {
         super.renderBackground();
 
-        // Desenhar nível (usando cache)
         this.drawLevel();
 
-        // Atualizar jogador
         if (this.player) {
             this.player.update();
 
@@ -240,7 +234,6 @@ export default class GameScreen extends BaseScreen {
             }
         }
 
-        // Verificar colisões
         Collision.check();
     }
 }

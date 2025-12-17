@@ -82,7 +82,7 @@ export default class Player {
             w: this.HITBOX_WIDTH,
             h: this.currentAnimation.frameHeight - this.HITBOX_OFFSET_Y,
             layer: 'player',
-            mask: ['enemy', 'ground', 'wall', 'platform', 'collectible', 'hazard'],
+            mask: ['enemy', 'ground', 'wall', 'platform'],
             tags: ['player', 'damageable'],
             data: { entity: this }
         });
