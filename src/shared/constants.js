@@ -18,12 +18,12 @@ const PLAYERS_PORT = {
     PLAYER_TWO: 1
 }
 const PLAYER_MOVEMENT = {
-    DEFAULT_GRAVITY: 0.4,
-    DEFAULT_JUMP_STRENGTH: -1,
+    DEFAULT_GRAVITY: 0.8,
+    DEFAULT_JUMP_STRENGTH: -2,
     DEFAULT_JUMPS: 2,
-    DEFAULT_SPEED: 16,
-    WALL_SLIDE_SPEED: 1,
-    MAX_Y_VELOCITY: 10
+    DEFAULT_SPEED: 18,
+    WALL_SLIDE_SPEED: 2,
+    MAX_Y_VELOCITY: 16
 };
 const PLAYER_ANIMATION = {
     IDLE: 'IDLE',
@@ -80,7 +80,7 @@ const SCREENS = {
     MENU: 'MENU',
     GAME: 'GAME'
 }
-const TARGET_FPS = 60;
+const TARGET_FPS = 30;
 const DELTA_TIME = Math.fround(1.0 / TARGET_FPS);
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
 

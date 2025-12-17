@@ -78,9 +78,9 @@ export default class Player {
         this.colliderId = Collision.register({
             type: 'rect',
             x: this.movement.position.x,
-            y: this.movement.position.y + 6,
-            w: 28,
-            h: this.currentAnimation.frameHeight - 6,
+            y: this.movement.position.y + this.HITBOX_OFFSET_Y,
+            w: this.HITBOX_WIDTH,
+            h: this.currentAnimation.frameHeight - this.HITBOX_OFFSET_Y,
             layer: 'player',
             mask: ['enemy', 'ground', 'wall', 'platform', 'collectible', 'hazard'],
             tags: ['player', 'damageable'],
@@ -89,63 +89,47 @@ export default class Player {
     }
 
     getBounds() {
-        this._bounds.left = this.movement.position.x;
-        this._bounds.top = this.movement.position.y;
-        this._bounds.right = this.movement.position.x;
+        this._bounds.left = this.movement.position.x - 8;
+        this._bounds.top = this.movement.position.y + 8;
+        this._bounds.right = this.movement.position.x + 8;
         this._bounds.bottom = this.movement.position.y + this.currentAnimation.frameHeight;
 
         return this._bounds;
     }
 
     updateAnimation() {
-        if (!this.movement.canMove) {
-            this.state = PLAYER_ANIMATION.HIT;
-        }
-        else if (this.movement.touchingWall && !this.movement.onGround && this.movement.velocity.y > 0) {
-            this.state = PLAYER_ANIMATION.WALL_JUMP;
-        }
-        else if (this.movement.isDoubleJumping()) {
-            this.state = PLAYER_ANIMATION.DOUBLE_JUMP;
-        }
-        else if (this.movement.isJumping()) {
-            this.state = PLAYER_ANIMATION.JUMP;
-        }
-        else if (this.movement.isFalling()) {
-            this.state = PLAYER_ANIMATION.FALL;
-        }
-        else if (this.movement.isMoving()) {
-            this.state = PLAYER_ANIMATION.RUN;
-        }
-        else {
-            this.state = PLAYER_ANIMATION.IDLE;
-        }
+        if (!this.movement.canMove) this.state = PLAYER_ANIMATION.HIT;
+        else if (this.movement.isWallSliding()) this.state = PLAYER_ANIMATION.WALL_JUMP;
+        else if (this.movement.isDoubleJumping()) this.state = PLAYER_ANIMATION.DOUBLE_JUMP;
+        else if (this.movement.isJumping()) this.state = PLAYER_ANIMATION.JUMP;
+        else if (this.movement.isFalling()) this.state = PLAYER_ANIMATION.FALL;
+        else if (this.movement.isMoving()) this.state = PLAYER_ANIMATION.RUN;
+        else this.state = PLAYER_ANIMATION.IDLE;
 
-        if (this.currentAnimation !== this.animations[this.state]) {
-            this.currentAnimation = this.animations[this.state];
-        }
+        if (this.currentAnimation !== this.animations[this.state]) this.currentAnimation = this.animations[this.state];
     }
 
     updateCollider() {
         if (!this.colliderId) return;
 
         const bounds = this.getBounds();
-        
+
         Collision.update(this.colliderId, {
             x: bounds.left,
             y: bounds.top,
-            w: bounds.right - bounds.left,
+            w: this.HITBOX_WIDTH,
             h: bounds.bottom - bounds.top
         });
     }
 
     drawCollisionBox() {
-        this.getBounds();
+        const bounds = this.getBounds();
 
         Draw.quad(
-            this._bounds.left, this._bounds.top,
-            this._bounds.right, this._bounds.top,
-            this._bounds.right, this._bounds.bottom,
-            this._bounds.left, this._bounds.bottom,
+            bounds.left, bounds.top,
+            bounds.right, bounds.top,
+            bounds.right, bounds.bottom,
+            bounds.left, bounds.bottom,
             this.debugColor
         );
     }
@@ -161,8 +145,8 @@ export default class Player {
             Math.fround(this.movement.position.x - this.currentAnimation.width / 2),
             this.movement.position.y
         );
-        
-        this.drawCollisionBox();
+
+        //this.drawCollisionBox();
     }
 
     update() {
@@ -170,9 +154,7 @@ export default class Player {
         this.movement.update(this.colliderId, bounds);
 
         this.updateCollider();
-
         this.updateAnimation();
-
         this.draw();
     }
 
@@ -192,6 +174,6 @@ export default class Player {
         if (this.movement.canMove) return false;
 
         return this.movement.position.y > SCREEN_HEIGHT ||
-               Math.abs(this.movement.position.x) > SCREEN_WIDTH + 100;
+            Math.abs(this.movement.position.x) > SCREEN_WIDTH + 100;
     }
 }

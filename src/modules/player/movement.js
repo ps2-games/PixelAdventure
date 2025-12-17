@@ -21,22 +21,14 @@ export default class Movement2D {
     isDoubleJumping = () => this.velocity.y < 0 && this.jumpsRemaining === 0;
     isGrounded = () => this.onGround;
     isIdle = () => this.isGrounded() && !this.isMoving();
+    isWallSliding = () => this.touchingWall && !this.onGround && this.velocity.y > 0;
     isInMaxYVelocity = () => this.velocity.y <= PLAYER_MOVEMENT.MAX_Y_VELOCITY;
     setCanMove = (canMove) => this.canMove = canMove;
+    applyGravity = () => this.velocity.y += (this.canMove ? PLAYER_MOVEMENT.DEFAULT_GRAVITY : PLAYER_MOVEMENT.DEFAULT_GRAVITY / 32) * DELTA_TIME
 
-    moveRight() {
-        this.facingLeft = false;
-        this.velocity.x = PLAYER_MOVEMENT.DEFAULT_SPEED * DELTA_TIME
-    }
-
-    moveLeft() {
-        this.facingLeft = true;
-        this.velocity.x = -PLAYER_MOVEMENT.DEFAULT_SPEED * DELTA_TIME;
-    }
-
-    applyGravity() {
-        const gravity = this.canMove ? PLAYER_MOVEMENT.DEFAULT_GRAVITY : PLAYER_MOVEMENT.DEFAULT_GRAVITY / 32;
-        this.velocity.y += gravity * DELTA_TIME;
+    moveHorizontally(direction) {
+        this.facingLeft = direction.forLeft
+        this.velocity.x = PLAYER_MOVEMENT.DEFAULT_SPEED * (direction.forLeft ? -1 : 1);
     }
 
     jump() {
@@ -50,7 +42,7 @@ export default class Movement2D {
         if (!this.touchingWall || this.onGround) return;
 
         this.velocity.y = PLAYER_MOVEMENT.DEFAULT_JUMP_STRENGTH * 0.9;
-        this.velocity.x = -this.wallDirection * PLAYER_MOVEMENT.DEFAULT_SPEED * DELTA_TIME * 1.5;
+        this.velocity.x = -this.wallDirection * PLAYER_MOVEMENT.WALL_SLIDE_SPEED * 1.5;
         this.jumpsRemaining = PLAYER_MOVEMENT.DEFAULT_JUMPS - 1;
         this.facingLeft = this.wallDirection > 0;
     }
@@ -149,7 +141,7 @@ export default class Movement2D {
         this.canMove = false;
 
         const direction = this.facingLeft ? 1 : -1;
-        this.velocity.x = direction * 2 * DELTA_TIME;
+        this.velocity.x = direction * 2;
         this.velocity.y = -12 * DELTA_TIME;
 
         this.deathRotation = 0;
@@ -157,41 +149,31 @@ export default class Movement2D {
     }
 
     handleInput() {
-        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.RIGHT)) {
-            this.moveRight();
-        } else if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.LEFT)) {
-            this.moveLeft();
-        } else {
-            this.velocity.x = 0;
-        }
+        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.RIGHT)) this.moveHorizontally({ forLeft: false });
+        else if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.LEFT)) this.moveHorizontally({ forLeft: true });
+        else this.velocity.x = 0;
 
         if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).justPressed(Pads.CROSS)) {
-            if (this.touchingWall && !this.onGround) {
-                this.wallJump();
-            } else {
-                this.jump();
-            }
+            if (this.touchingWall && !this.onGround) this.wallJump();
+            else this.jump();
         }
 
-        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).justPressed(Pads.CIRCLE)) {
-            this.die();
-        }
+        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).justPressed(Pads.CIRCLE)) this.die();
     }
 
     updatePosition() {
-        if (this.isInMaxYVelocity()) {
-            this.applyGravity();
-        }
+        if (this.isInMaxYVelocity()) this.applyGravity();
 
-        this.position.x += this.velocity.x;
+        this.position.x += this.velocity.x * DELTA_TIME;
         this.position.y += this.velocity.y;
     }
 
     update(colliderId, bounds) {
-        if (this.canMove) {
-            this.handleInput();
-        } else {
-            this.deathRotation += this._deathRotationSpeed * DELTA_TIME;
+        if (this.canMove) this.handleInput();
+        else this.deathRotation += this._deathRotationSpeed * DELTA_TIME;
+
+        if (this.isWallSliding()) {
+            this.velocity.y = Math.min(this.velocity.y, 0.5);
         }
 
         this.updatePosition();
