@@ -1,4 +1,4 @@
-import { PLAYER_ANIMATION, ASSETS_PATH, PLAYER_MOVEMENT, SCREEN_HEIGHT, SCREEN_WIDTH } from "../../shared/constants.js";
+import { PLAYER_ANIMATION, ASSETS_PATH, PLAYER_MOVEMENT, SCREEN_HEIGHT, SCREEN_WIDTH, DELTA_TIME } from "../../shared/constants.js";
 import { animationHorizontalSprite } from "../../shared/animation.js";
 import Assets from "../../shared/assets.js";
 import Movement2D from "./movement.js";
@@ -20,49 +20,49 @@ export default class Player {
         return {
             [PLAYER_ANIMATION.IDLE]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Idle.png`, {
                 totalFrames: 11,
-                fps: 16,
+                fps: 2,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
             }),
             [PLAYER_ANIMATION.RUN]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Run.png`, {
                 totalFrames: 12,
-                fps: 12,
+                fps: 2,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
             }),
             [PLAYER_ANIMATION.JUMP]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Jump.png`, {
                 totalFrames: 1,
-                fps: 12,
+                fps: 2,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: false,
             }),
             [PLAYER_ANIMATION.DOUBLE_JUMP]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Double_Jump.png`, {
                 totalFrames: 6,
-                fps: 12,
+                fps: 2,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
             }),
             [PLAYER_ANIMATION.FALL]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Fall.png`, {
                 totalFrames: 1,
-                fps: 12,
+                fps: 2,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: false,
             }),
             [PLAYER_ANIMATION.WALL_JUMP]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Wall_Jump.png`, {
                 totalFrames: 5,
-                fps: 12,
+                fps: 2,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
             }),
             [PLAYER_ANIMATION.HIT]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Hit.png`, {
                 totalFrames: 7,
-                fps: 12,
+                fps: 2,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: false,
@@ -119,6 +119,7 @@ export default class Player {
     draw() {
         if (this.shouldRemove()) return;
 
+        this.currentAnimation.deltaTime = DELTA_TIME;
         animationHorizontalSprite(this.currentAnimation);
         this.currentAnimation.angle = this.movement.deathRotation;
         this.currentAnimation.facingLeft = this.movement.facingLeft

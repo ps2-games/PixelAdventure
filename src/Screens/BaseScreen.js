@@ -14,12 +14,7 @@ const BACKGROUNDS = [
 
 export default class BaseScreen {
     constructor() {
-        this.background = Assets.image(this._randomBackground());
-        this.parallaxState = {
-            backgroundsY: [0, SCREEN_HEIGHT],
-            screenHeight: SCREEN_HEIGHT
-        }
-
+        this.background = Assets.image(this._randomBackground(), {height: SCREEN_HEIGHT});
         this.screenManager = null;
     }
 
@@ -31,7 +26,7 @@ export default class BaseScreen {
     }
 
     renderBackground() {
-        parallaxToDown(this.background, this.parallaxState, 24)
+        parallaxToDown(this.background, 24)
     }
 
     setScreenManager(manager) {

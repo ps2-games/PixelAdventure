@@ -1,23 +1,25 @@
-function parallaxToDown(image, parallaxOptions, speed) {
-    if (parallaxOptions.backgroundsY[1] === 0) {
-        parallaxOptions.backgroundsY[1] = parallaxOptions.screenHeight;
+function parallaxToDown(image, speed) {
+    if (!image._parallax) {
+        image._parallax = {
+            positions: [0, -Math.fround(image.height)],
+            lastUpdate: Date.now()
+        };
     }
 
-    if (parallaxOptions.lastUpdate === undefined) parallaxOptions.lastUpdate = Date.now();
-
     const now = Date.now();
-    const deltaTime = now - parallaxOptions.lastUpdate;
-    parallaxOptions.lastUpdate = now;
+    const deltaTime = (now - image._parallax.lastUpdate) / 1000;
+    image._parallax.lastUpdate = now;
 
     for (let i = 0; i < 2; i++) {
-        parallaxOptions.backgroundsY[i] += speed * (deltaTime / 1000);
-        if (parallaxOptions.backgroundsY[i] >= parallaxOptions.screenHeight) {
-            parallaxOptions.backgroundsY[i] -= 2 * parallaxOptions.screenHeight;
+        image._parallax.positions[i] += speed * deltaTime;
+        
+        if (image._parallax.positions[i] >= Math.fround(image.height)) {
+            image._parallax.positions[i] -= Math.fround(2 * image.height);
         }
     }
 
-    image.draw(0, parallaxOptions.backgroundsY[0]);
-    image.draw(0, parallaxOptions.backgroundsY[1]);
+    image.draw(0, image._parallax.positions[0]);
+    image.draw(0, image._parallax.positions[1]);
 }
 function animationHorizontalSprite(image) {
     const {
@@ -34,11 +36,18 @@ function animationHorizontalSprite(image) {
     } = image;
 
     if (image.currentFrame === undefined) image.currentFrame = startFrame;
-    if (image.lastUpdate === undefined) image.lastUpdate = Date.now();
     if (image.frameTimer === undefined) image.frameTimer = 0;
+    if (image.lastUpdate === undefined) image.lastUpdate = Date.now();
 
     const now = Date.now();
-    const deltaTime = now - image.lastUpdate;
+    let deltaTime;
+    
+    if (image.deltaTime !== undefined) {
+        deltaTime = image.deltaTime * 1000;
+    } else {
+        deltaTime = now - image.lastUpdate;
+    }
+    
     image.lastUpdate = now;
 
     const frameTime = 1000 / fps;
