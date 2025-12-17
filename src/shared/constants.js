@@ -1,3 +1,5 @@
+import Assets from "./assets.js";
+
 // Assets
 const ASSETS_PATH = {
     Backgrounds: './assets/images/background',
@@ -84,6 +86,9 @@ const TARGET_FPS = 30;
 const DELTA_TIME = Math.fround(1.0 / TARGET_FPS);
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
 
+// Audio
+const PICKUP_FRUI_SFX = Assets.sound(`${ASSETS_PATH.SFX}/pickup_fruit.adp`)
+
 export {
     ASSETS_PATH,
     SCREENS,
@@ -100,5 +105,6 @@ export {
     BOX_TRAP_ANIMATION,
     SAW_TRAP_ANIMATIONS,
     FRUIT_ANIMATION_STATE,
-    PLAYER_ANIMATION
+    PLAYER_ANIMATION,
+    PICKUP_FRUI_SFX
 }
