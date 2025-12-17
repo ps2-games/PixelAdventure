@@ -30,13 +30,14 @@ export default class GameScreen extends BaseScreen {
 
     render() {
         super.renderBackground();
-
-        // const level = this.levelManager.getCurrentLevel();
-        // if (level) {
-        //     const deltaTime = 16.67;
-        //     level.update(deltaTime);
-        // }
-
-        this.player.update(16.67);
+    
+        if(this.player) {
+            this.player.update();
+            
+            if(this.player.shouldRemove()) {
+                this.player.destroy();
+                this.player = null;
+            }
+        }
     }
 }

@@ -133,9 +133,17 @@ export default class Player {
         this.draw();
     }
 
-    shouldRemove() {
-        if (this.isLiving) return false;
+    destroy() {
+        this.animations = null;
+        this.currentAnimation = null;
+        this.movement = null;
+        this.debugColor = null;
+    }
 
-        return this.movement.position.y > SCREEN_HEIGHT || Math.abs(this.movement.position.x) > SCREEN_WIDTH;
+    shouldRemove() {
+        if (this.movement.canMove) return false;
+        
+        return this.movement.position.y > SCREEN_HEIGHT || 
+               Math.abs(this.movement.position.x) > SCREEN_WIDTH;
     }
 }
