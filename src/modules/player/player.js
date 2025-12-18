@@ -12,8 +12,10 @@ export default class Player {
         this.state = PLAYER_ANIMATION.IDLE;
         this.colliderId = null;
 
+        this.HITBOX_WIDTH = 16;
+
         this.animations = this._initAnimations(options.character || 0);
-        this.currentAnimation = this.animations[PLAYER_ANIMATION.IDLE];
+        this.currentAnimation = this.animations[this.state];
 
         this.debugColor = Color.new(255, 0, 0, 100);
 
@@ -78,11 +80,11 @@ export default class Player {
         this.colliderId = Collision.register({
             type: 'rect',
             x: this.movement.position.x,
-            y: this.movement.position.y + this.HITBOX_OFFSET_Y,
-            w: this.HITBOX_WIDTH,
-            h: this.currentAnimation.frameHeight - this.HITBOX_OFFSET_Y,
+            y: this.movement.position.y,
+            w: this.currentAnimation.frameWidth,
+            h: this.currentAnimation.frameHeight,
             layer: 'player',
-            mask: ['enemy', 'ground', 'wall', 'platform'],
+            mask: ['enemy', 'ground', 'wall', 'platform', 'fruit'],
             tags: ['player', 'damageable'],
             data: { entity: this }
         });

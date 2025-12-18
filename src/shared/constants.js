@@ -37,6 +37,22 @@ const PLAYER_ANIMATION = {
     HIT: "HIT",
 };
 
+// Fruits
+const FRUIT_ANIMATION = {
+    IDLE: 'IDLE',
+    COLLECTED: 'COLLECTED'
+}
+const FRUITS = {
+    APPLE: 'Apple',
+    BANANAS: 'Bananas',
+    CHERRIES: 'Cherries',
+    KIWI: 'Kiwi',
+    MELON: 'Melon',
+    ORANGE: 'Orange',
+    PINEAPPLE: 'Pineapple',
+    STRAWBERRY: 'Strawberry'
+}
+
 // Traps
 const TRAP_TYPES = {
     SPIKE: 'spike',
@@ -51,10 +67,6 @@ const BOX_TRAP_ANIMATION = {
 };
 const SAW_TRAP_ANIMATIONS = {
     ON: 'ON',
-};
-const FRUIT_ANIMATION_STATE = {
-    IDLE: 'IDLE',
-    COLLECTED: 'COLLECTED'
 };
 
 //Tiles
@@ -104,7 +116,8 @@ export {
     PLAYER_MOVEMENT,
     BOX_TRAP_ANIMATION,
     SAW_TRAP_ANIMATIONS,
-    FRUIT_ANIMATION_STATE,
+    FRUIT_ANIMATION,
     PLAYER_ANIMATION,
-    PICKUP_FRUI_SFX
+    PICKUP_FRUI_SFX,
+    FRUITS
 }

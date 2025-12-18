@@ -1,6 +1,7 @@
+import Fruit from "../modules/fruit/fruit.js";
 import Player from "../modules/player/player.js";
 import Collision from "../shared/collision.js";
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../shared/constants.js";
+import { FRUITS, SCREEN_HEIGHT, SCREEN_WIDTH } from "../shared/constants.js";
 import BaseScreen from "./baseScreen.js";
 
 export default class GameScreen extends BaseScreen {
@@ -8,6 +9,7 @@ export default class GameScreen extends BaseScreen {
         super();
         this.player = null;
         this.levelColliders = [];
+        this.fruits = [];
         this.debugMode = false;
         
         this.levelCache = {
@@ -28,6 +30,8 @@ export default class GameScreen extends BaseScreen {
             character: 0
         });
 
+        this.fruits.push(new Fruit(FRUITS.APPLE));
+
         this.cacheLevelLayers();
     }
 
@@ -36,6 +40,9 @@ export default class GameScreen extends BaseScreen {
             this.player.destroy();
             this.player = null;
         }
+
+        this.fruits.forEach(fruit => fruit.destroy());
+        this.fruits = [];
 
         this.levelColliders.forEach(id => Collision.unregister(id));
         this.levelColliders = [];
@@ -50,7 +57,6 @@ export default class GameScreen extends BaseScreen {
     }
 
     createLevel() {
-        // Chão principal
         this.levelColliders.push(
             Collision.register({
                 type: 'rect',
@@ -66,7 +72,6 @@ export default class GameScreen extends BaseScreen {
             })
         );
 
-        // Plataformas
         const platforms = [
             { x: 50, y: 350, w: 120, h: 16 },
             { x: 220, y: 280, w: 140, h: 16 },
@@ -88,7 +93,6 @@ export default class GameScreen extends BaseScreen {
             );
         });
 
-        // Paredes laterais
         this.levelColliders.push(
             Collision.register({
                 type: 'rect',
@@ -119,7 +123,6 @@ export default class GameScreen extends BaseScreen {
             })
         );
 
-        // Paredes para wall jump
         this.levelColliders.push(
             Collision.register({
                 type: 'rect',
@@ -150,7 +153,6 @@ export default class GameScreen extends BaseScreen {
             })
         );
 
-        // Teto
         this.levelColliders.push(
             Collision.register({
                 type: 'rect',
@@ -168,7 +170,6 @@ export default class GameScreen extends BaseScreen {
     }
 
     cacheLevelLayers() {
-        // Buscar todas as layers UMA VEZ e guardar em cache
         this.levelCache.grounds = Collision.getByLayer('ground');
         this.levelCache.platforms = Collision.getByLayer('platform');
         this.levelCache.walls = Collision.getByLayer('wall');
@@ -177,10 +178,8 @@ export default class GameScreen extends BaseScreen {
     }
 
     drawLevel() {
-        // Usar cache ao invés de buscar do Collision toda vez
         const { grounds, platforms, walls, ceilings } = this.levelCache;
 
-        // Desenhar chão
         if (grounds) {
             for (let i = 0; i < grounds.length; i++) {
                 const g = grounds[i];
@@ -188,7 +187,6 @@ export default class GameScreen extends BaseScreen {
             }
         }
 
-        // Desenhar plataformas
         if (platforms) {
             for (let i = 0; i < platforms.length; i++) {
                 const p = platforms[i];
@@ -196,7 +194,6 @@ export default class GameScreen extends BaseScreen {
             }
         }
 
-        // Desenhar paredes
         if (walls) {
             for (let i = 0; i < walls.length; i++) {
                 const w = walls[i];
@@ -231,6 +228,16 @@ export default class GameScreen extends BaseScreen {
                     initialY: 100,
                     character: 0
                 });
+            }
+        }
+
+        for (let i = this.fruits.length - 1; i >= 0; i--) {
+            const fruit = this.fruits[i];
+            fruit.update();
+            
+            if (fruit.shouldRemove()) {
+                fruit.destroy();
+                this.fruits.splice(i, 1);
             }
         }
 
