@@ -8,11 +8,14 @@ const ASSETS_PATH = {
     Characters: './assets/images/sheets/characters',
     Sounds: './assets/sounds',
     SFX: './assets/sounds/sfx',
-    TileSet: './assets/images/tileset',
+    TileSet: './assets/images/tileset/terrain.png',
     UI: './assets/images/ui',
     VFX: './assets/images/vfx',
     TRAPS: './assets/images/sheets/traps'
 }
+
+// Audio
+const PICKUP_FRUI_SFX = Assets.sound(`${ASSETS_PATH.SFX}/pickup_fruit.adp`)
 
 // Player
 const PLAYERS_PORT = {
@@ -71,23 +74,8 @@ const SAW_TRAP_ANIMATIONS = {
 
 //Tiles
 const TILE_SIZE = 16;
-const BACKGROUND_SIZE = 64;
-const TILE_TYPES = {
-    BACKGROUND: 'background',
-    GROUND: 'ground',
-    NON_COLLIDABLE: 'NON_COLLIDABLE',
-    PLATFORM: 'platform',
-    DECORATION: 'decoration',
-    WALL: 'wall',
-};
-const TILE_PROPERTIES = {
-    [TILE_TYPES.GROUND]: { collidable: true, walkable: true, isPlatform: false },
-    [TILE_TYPES.NON_COLLIDABLE]: { collidable: false, walkable: false, isPlatform: false },
-    [TILE_TYPES.PLATFORM]: { collidable: true, walkable: true, isPlatform: true },
-    [TILE_TYPES.DECORATION]: { collidable: false, walkable: false, isPlatform: false },
-    [TILE_TYPES.WALL]: { collidable: true, walkable: false, isPlatform: false },
-    [TILE_TYPES.BACKGROUND]: { collidable: false, walkable: false, isPlatform: false },
-};
+const TILES_PER_ROW = 22;
+const TILES_PER_COLUMN = 11;
 
 //General Config
 const SCREENS = {
@@ -98,18 +86,14 @@ const TARGET_FPS = 30;
 const DELTA_TIME = Math.fround(1.0 / TARGET_FPS);
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
 
-// Audio
-const PICKUP_FRUI_SFX = Assets.sound(`${ASSETS_PATH.SFX}/pickup_fruit.adp`)
-
 export {
     ASSETS_PATH,
     SCREENS,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     TILE_SIZE,
-    BACKGROUND_SIZE,
-    TILE_PROPERTIES,
-    TILE_TYPES,
+    TILES_PER_ROW,
+    TILES_PER_COLUMN,
     PLAYERS_PORT,
     TRAP_TYPES,
     DELTA_TIME,
