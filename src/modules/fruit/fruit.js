@@ -5,11 +5,11 @@ import Collision from "../../shared/collision.js";
 import { ASSETS_PATH, DELTA_TIME, FRUIT_ANIMATION, PICKUP_FRUI_SFX } from "../../shared/constants.js";
 
 export default class Fruit {
-    constructor(fruit) {
+    constructor(fruit, x, y) {
         this.fruitType = fruit;
         this.isCollected = false;
 
-        this.position = { x: 250, y: 250 };
+        this.position = { x, y };
         this._bounds = { left: 0, top: 0, right: 0, bottom: 0 };
 
         this.colliderId = null;

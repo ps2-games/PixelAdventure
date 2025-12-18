@@ -30,7 +30,7 @@ export default class GameScreen extends BaseScreen {
             character: 0
         });
 
-        this.fruits.push(new Fruit(FRUITS.APPLE));
+        this.fruits.push(new Fruit(FRUITS.APPLE, 250, 250));
 
         this.cacheLevelLayers();
     }
