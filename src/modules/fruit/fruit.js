@@ -26,7 +26,7 @@ export default class Fruit {
         return {
             [FRUIT_ANIMATION.IDLE]: Assets.image(`${ASSETS_PATH.Fruits}/${this.fruitType}.png`, {
                 totalFrames: 17,
-                fps: 2,
+                fps: 4,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
