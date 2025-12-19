@@ -34,7 +34,7 @@ export default class TilemapRenderer {
             textures: [ASSETS_PATH.TileSet],
             materials: [{
                 texture_index: 0,
-                blend_mode: Screen.alphaEquation(Screen.ONE_RGB, Screen.ZERO_RGB, Screen.ONE_RGB, Screen.ZERO_RGB, 0),
+                blend_mode: Screen.alphaEquation(Screen.ONE_RGB, Screen.ONE_MINUS_SRC_ALPHA, Screen.ONE_RGB, Screen.ONE_MINUS_SRC_ALPHA, 0),
                 end_offset: this.spriteDefs.length - 1,
             }],
         });

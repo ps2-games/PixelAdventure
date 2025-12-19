@@ -26,12 +26,15 @@ file.close();
 
 const mapData = JSON.parse(jsonString);
 
-const tileRender = new TilemapRenderer(mapData.tiles);
+const tileRender = new TilemapRenderer(mapData);
 
-Screen.display(() => {
+while (true) {
+    Screen.clear(Color.new(33, 31, 48,128));
     //InputManager.update();
 
     //screenManager.update();
     //screenManager.render();
     tileRender.draw(0, 0);
-});
+
+    Screen.flip();
+};
