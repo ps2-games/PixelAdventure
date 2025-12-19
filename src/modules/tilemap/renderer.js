@@ -1,31 +1,33 @@
-import { ASSETS_PATH, TILE_SIZE, TILES_PER_COLUMN, TILES_PER_ROW } from "../../shared/constants.js";
+import { ASSETS_PATH, TILE_SIZE, TILES_PER_ROW } from "../../shared/constants.js";
 
 export default class TilemapRenderer {
-    constructor() {
-        this.spacing = 8;
+    constructor(mapdata) {
 
         this.spriteDefs = [];
-        for (let y = 0; y < TILES_PER_COLUMN; y++) {
-            for (let x = 0; x < TILES_PER_ROW; x++) {
-                const atlasX = x * TILE_SIZE;
-                const atlasY = y * TILE_SIZE;
-                
-                this.spriteDefs.push({
-                    x: x * (TILE_SIZE + this.spacing),
-                    y: y * (TILE_SIZE + this.spacing),
-                    w: TILE_SIZE,
-                    h: TILE_SIZE,
-                    zindex: 1,
-                    u1: atlasX,
-                    v1: atlasY,
-                    u2: atlasX + 16,
-                    v2: atlasY + 16,
-                    r: 128,
-                    g: 128,
-                    b: 128,
-                    a: 128,
-                });
-            }
+        for (let i = 0; i < mapdata.length; i++) {
+            const tileIndex = mapdata[i][0];
+            
+            const atlasCol = tileIndex % TILES_PER_ROW;
+            const atlasRow = Math.floor(tileIndex / TILES_PER_ROW);
+            
+            const atlasX = atlasCol * TILE_SIZE;
+            const atlasY = atlasRow * TILE_SIZE;
+            
+            this.spriteDefs.push({
+                x: mapdata[i][1],
+                y: mapdata[i][2],
+                w: TILE_SIZE,
+                h: TILE_SIZE,
+                zindex: 1,
+                u1: atlasX,
+                v1: atlasY,
+                u2: atlasX + TILE_SIZE,
+                v2: atlasY + TILE_SIZE,
+                r: 128,
+                g: 128,
+                b: 128,
+                a: 128,
+            });
         }
 
         this.descriptor = new TileMap.Descriptor({
@@ -44,7 +46,7 @@ export default class TilemapRenderer {
         TileMap.init();
     }
 
-    draw(x, y){
+    draw(x = 0, y = 0){
         TileMap.begin();
 
         this.tileMap.render(x, y);
