@@ -4,15 +4,16 @@ export default class TilemapRenderer {
     constructor(mapdata) {
 
         this.spriteDefs = [];
+        
         for (let i = 0; i < mapdata.length; i++) {
             const tileIndex = mapdata[i][0];
-            
+
             const atlasCol = tileIndex % TILES_PER_ROW;
             const atlasRow = Math.floor(tileIndex / TILES_PER_ROW);
-            
+
             const atlasX = atlasCol * TILE_SIZE;
             const atlasY = atlasRow * TILE_SIZE;
-            
+
             this.spriteDefs.push({
                 x: mapdata[i][1],
                 y: mapdata[i][2],
@@ -34,7 +35,13 @@ export default class TilemapRenderer {
             textures: [ASSETS_PATH.TileSet],
             materials: [{
                 texture_index: 0,
-                blend_mode: Screen.alphaEquation(Screen.ONE_RGB, Screen.ONE_MINUS_SRC_ALPHA, Screen.ONE_RGB, Screen.ONE_MINUS_SRC_ALPHA, 0),
+                blend_mode: Screen.alphaEquation(
+                    Screen.SRC_RGB,
+                    Screen.DST_RGB,
+                    Screen.SRC_ALPHA,
+                    Screen.DST_RGB,
+                    0
+                ),
                 end_offset: this.spriteDefs.length - 1,
             }],
         });
@@ -46,7 +53,7 @@ export default class TilemapRenderer {
         TileMap.init();
     }
 
-    draw(x = 0, y = 0){
+    draw(x = 0, y = 0) {
         TileMap.begin();
 
         this.tileMap.render(x, y);
