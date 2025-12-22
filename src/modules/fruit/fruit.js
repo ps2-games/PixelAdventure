@@ -26,7 +26,7 @@ export default class Fruit {
         return {
             [FRUIT_ANIMATION.IDLE]: Assets.image(`${ASSETS_PATH.Fruits}/${this.fruitType}.png`, {
                 totalFrames: 17,
-                fps: 4,
+                fps: 2,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
@@ -41,32 +41,32 @@ export default class Fruit {
         }
     }
 
-_initCollider() {
-    const fw = this.currentAnimation.frameWidth;
-    const fh = this.currentAnimation.frameHeight;
+    _initCollider() {
+        const fw = this.currentAnimation.frameWidth;
+        const fh = this.currentAnimation.frameHeight;
 
-    const halfW = fw / 2;
-    const halfH = fh / 2;
-    const quarterW = fw / 4;
-    const quarterH = fh / 4;
+        const halfW = fw / 2;
+        const halfH = fh / 2;
+        const quarterW = fw / 4;
+        const quarterH = fh / 4;
 
-    this.colliderId = Collision.register({
-        type: 'rect',
-        x: this.position.x + quarterW,
-        y: this.position.y + quarterH,
-        w: halfW,
-        h: halfH,
-        layer: 'fruit',
-        mask: ['player'],
-        tags: ['fruit', 'collectible'],
-        data: { entity: this },
-        onCollision: (config) => {
-            if (config.layer === 'player' && !this.isCollected) {
-                this.collect();
+        this.colliderId = Collision.register({
+            type: 'rect',
+            x: this.position.x + quarterW,
+            y: this.position.y + quarterH,
+            w: halfW,
+            h: halfH,
+            layer: 'fruit',
+            mask: ['player'],
+            tags: ['fruit', 'collectible'],
+            data: { entity: this },
+            onCollision: (config) => {
+                if (config.layer === 'player' && !this.isCollected) {
+                    this.collect();
+                }
             }
-        }
-    });
-}
+        });
+    }
 
     collect() {
         if (this.isCollected) return;

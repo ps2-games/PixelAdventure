@@ -14,15 +14,25 @@ export default class GameScreen extends BaseScreen {
     }
 
     async onEnter() {
-        this.createLevel();
+        const mapData = this.readLevelData();
+
+        if(mapData.tiles){
+            this.tileRender = new TilemapRenderer(mapData.tiles);
+        }
+
+        if (mapData.colliders) {
+            this.createColliders(mapData.colliders)
+        }
+
+        if (mapData.fruits) {
+            this.createFruits(mapData.fruits)
+        }
 
         this.player = new Player({
-            initialX: 100,
-            initialY: 250,
+            initialX: mapData.player.x || 100,
+            initialY: mapData.player.y || 250,
             character: 0
         });
-
-        this.fruits.push(new Fruit(FRUITS.APPLE, 250, 250));
     }
 
     onExit() {
@@ -35,24 +45,24 @@ export default class GameScreen extends BaseScreen {
         this.fruits = [];
     }
 
-    createLevel() {
+    readLevelData() {
         const file = std.open("data.json", "r");
         const jsonString = file.readAsString();
 
         file.close();
 
-        const mapData = JSON.parse(jsonString);
-
-        this.tileRender = new TilemapRenderer(mapData.tiles);
-
-        if(mapData.colliders){
-            this.createColliders(mapData.colliders)
-        }
+        return JSON.parse(jsonString)
     }
 
     createColliders(colliders) {
         for (let index = 0; index < colliders.length; index++) {
             Collision.register(colliders[index])
+        }
+    }
+
+    createFruits(fruits) {
+        for (let index = 0; index < fruits.length; index++) {
+            this.fruits.push(new Fruit(FRUITS[fruits[index][0]], fruits[index][1], fruits[index][2]));
         }
     }
 
@@ -71,11 +81,11 @@ export default class GameScreen extends BaseScreen {
             this.player.update();
             if (this.player.shouldRemove()) {
                 this.player.destroy();
-                this.player = new Player({
-                    initialX: 100,
-                    initialY: 100,
-                    character: 0
-                });
+                // this.player = new Player({
+                //     initialX: 100,
+                //     initialY: 250,
+                //     character: 0
+                // });
             }
         }
 
