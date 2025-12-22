@@ -11,6 +11,13 @@ class Collision {
         this.nextId = 0;
         this.spatialGrid = null;
         this.gridSize = 64;
+        this.debugMode = false;
+        this.debugColors = {
+            dynamic: Color.new(0, 255, 0, 100),
+            static: Color.new(255, 0, 0, 100),
+            active: Color.new(255, 255, 0, 150)
+        };
+        this.activeCollisions = new Set();
     }
 
     register(config) {
@@ -71,6 +78,8 @@ class Collision {
     }
 
     check() {
+        this.activeCollisions.clear();
+        
         const dynamics = [...this.colliders.values()];
         const statics = [...this.staticColliders.values()];
 
@@ -201,10 +210,57 @@ class Collision {
         return null;
     }
 
+    toggleDebug() {
+        this.debugMode = !this.debugMode;
+        return this.debugMode;
+    }
+
+    setDebugMode(enabled) {
+        this.debugMode = enabled;
+    }
+
+    renderDebug() {
+        if (!this.debugMode) return;
+
+        for (const collider of this.staticColliders.values()) {
+            this.#drawCollider(collider, this.debugColors.static);
+        }
+
+        for (const collider of this.colliders.values()) {
+            const isActive = this.activeCollisions.has(collider.id);
+            const color = isActive ? this.debugColors.active : this.debugColors.dynamic;
+            this.#drawCollider(collider, color);
+        }
+    }
+
+    #drawCollider(collider, color) {
+        if (collider.type === 'rect') {
+            Draw.rect(collider.x, collider.y, collider.w, collider.h, color);
+            
+            Draw.line(collider.x, collider.y, collider.x + collider.w, collider.y, color);
+            Draw.line(collider.x + collider.w, collider.y, collider.x + collider.w, collider.y + collider.h, color);
+            Draw.line(collider.x + collider.w, collider.y + collider.h, collider.x, collider.y + collider.h, color);
+            Draw.line(collider.x, collider.y + collider.h, collider.x, collider.y, color);
+        } else if (collider.type === 'circle') {
+            Draw.circle(collider.x, collider.y, collider.r, color, true);
+            
+            const outlineColor = Color.new(
+                Color.getR(color),
+                Color.getG(color),
+                Color.getB(color),
+                255
+            );
+            Draw.circle(collider.x, collider.y, collider.r, outlineColor, false);
+        }
+    }
+
     #testPair(a, b) {
         if (!this.#canCollide(a, b)) return;
 
         if (this.test(a, b)) {
+            this.activeCollisions.add(a.id);
+            this.activeCollisions.add(b.id);
+            
             a.onCollision?.(b);
             b.onCollision?.(a);
         }
@@ -355,7 +411,7 @@ class Collision {
     #getRectNormal(x, y, dirX, dirY, t, rect) {
         const px = x + dirX * t;
         const py = y + dirY * t;
-        const eps = 0.001f;
+        const eps = 0.001;
 
         if (Math.abs(px - rect.x) < eps) return { x: -1, y: 0 };
         if (Math.abs(px - (rect.x + rect.w)) < eps) return { x: 1, y: 0 };
@@ -369,15 +425,7 @@ class Collision {
         this.colliders.clear();
         this.staticColliders.clear();
         this.layers.clear();
-    }
-
-    getStats() {
-        return {
-            dynamic: this.colliders.size,
-            static: this.staticColliders.size,
-            layers: this.layers.size,
-            total: this.colliders.size + this.staticColliders.size
-        };
+        this.activeCollisions.clear();
     }
 
     getByLayer(layer) {

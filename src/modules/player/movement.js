@@ -72,47 +72,59 @@ export default class Movement2D {
         return this.onGround;
     }
 
-    checkWallCollision(colliderId, bounds) {
-        const leftCheck = Collision.checkArea({
-            type: 'rect',
-            x: bounds.left - 2,
-            y: bounds.top + 4,
-            w: 2,
-            h: (bounds.bottom - bounds.top) - 8,
-            mask: ['ground', 'wall', 'platform'],
-            excludeId: colliderId
-        });
-        const rightCheck = Collision.checkArea({
-            type: 'rect',
-            x: bounds.right,
-            y: bounds.top + 4,
-            w: 2,
-            h: (bounds.bottom - bounds.top) - 8,
-            mask: ['ground', 'wall', 'platform'],
-            excludeId: colliderId
-        });
+checkWallCollision(colliderId, bounds) {
+    const leftCheck = Collision.checkArea({
+        type: 'rect',
+        x: bounds.left - 2,
+        y: bounds.top + 4,
+        w: 2,
+        h: (bounds.bottom - bounds.top) - 8,
+        mask: ['ground', 'wall', 'platform'],
+        excludeId: colliderId
+    });
+    const rightCheck = Collision.checkArea({
+        type: 'rect',
+        x: bounds.right,
+        y: bounds.top + 4,
+        w: 2,
+        h: (bounds.bottom - bounds.top) - 8,
+        mask: ['ground', 'wall', 'platform'],
+        excludeId: colliderId
+    });
 
-        this.touchingWall = false;
-        this.wallDirection = 0;
+    this.touchingWall = false;
+    this.wallDirection = 0;
 
-        if (leftCheck.length > 0 && this.velocity.x < 0) {
-            const wall = leftCheck[0].collider;
+    if (leftCheck.length > 0 && this.velocity.x < 0) {
+        const validWalls = leftCheck.filter(hit => 
+            hit.layer !== 'platform' && !hit.tags.includes('platform')
+        );
+        
+        if (validWalls.length > 0) {
+            const wall = validWalls[0].collider;
             this.position.x = wall.x + wall.w + (this.position.x - bounds.left);
             this.velocity.x = 0;
             this.touchingWall = true;
             this.wallDirection = -1;
         }
+    }
 
-        if (rightCheck.length > 0 && this.velocity.x > 0) {
-            const wall = rightCheck[0].collider;
+    if (rightCheck.length > 0 && this.velocity.x > 0) {
+        const validWalls = rightCheck.filter(hit => 
+            hit.layer !== 'platform' && !hit.tags.includes('platform')
+        );
+        
+        if (validWalls.length > 0) {
+            const wall = validWalls[0].collider;
             this.position.x = wall.x - (bounds.right - this.position.x);
             this.velocity.x = 0;
             this.touchingWall = true;
             this.wallDirection = 1;
         }
-
-        return this.touchingWall;
     }
+
+    return this.touchingWall;
+}
 
     checkCeilingCollision(colliderId, bounds) {
         const ceilingCheck = Collision.checkArea({
@@ -127,6 +139,11 @@ export default class Movement2D {
 
         if (ceilingCheck.length > 0 && this.velocity.y < 0) {
             const ceiling = ceilingCheck[0].collider;
+
+            if (ceiling.layer === 'platform' || ceiling.tags.includes('platform')) {
+                return false;
+            }
+
             this.position.y = ceiling.y + ceiling.h + (this.position.y - bounds.top);
             this.velocity.y = 0;
             return true;
