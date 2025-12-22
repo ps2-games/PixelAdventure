@@ -41,24 +41,32 @@ export default class Fruit {
         }
     }
 
-    _initCollider() {
-        this.colliderId = Collision.register({
-            type: 'rect',
-            x: this.position.x,
-            y: this.position.y,
-            w: this.currentAnimation.frameWidth,
-            h: this.currentAnimation.frameHeight,
-            layer: 'fruit',
-            mask: ['player'],
-            tags: ['fruit', 'collectible'],
-            data: { entity: this },
-            onCollision: (config) => {
-                if (config.layer === 'player' && !this.isCollected) {
-                    this.collect();
-                }
+_initCollider() {
+    const fw = this.currentAnimation.frameWidth;
+    const fh = this.currentAnimation.frameHeight;
+
+    const halfW = fw / 2;
+    const halfH = fh / 2;
+    const quarterW = fw / 4;
+    const quarterH = fh / 4;
+
+    this.colliderId = Collision.register({
+        type: 'rect',
+        x: this.position.x + quarterW,
+        y: this.position.y + quarterH,
+        w: halfW,
+        h: halfH,
+        layer: 'fruit',
+        mask: ['player'],
+        tags: ['fruit', 'collectible'],
+        data: { entity: this },
+        onCollision: (config) => {
+            if (config.layer === 'player' && !this.isCollected) {
+                this.collect();
             }
-        });
-    }
+        }
+    });
+}
 
     collect() {
         if (this.isCollected) return;
