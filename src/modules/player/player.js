@@ -33,7 +33,7 @@ export default class Player {
             }),
             [PLAYER_ANIMATION.RUN]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Run.png`, {
                 totalFrames: 12,
-                fps: 2,
+                fps: 8,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
@@ -47,7 +47,7 @@ export default class Player {
             }),
             [PLAYER_ANIMATION.DOUBLE_JUMP]: Assets.image(`${ASSETS_PATH.Characters}/${character}/Double_Jump.png`, {
                 totalFrames: 6,
-                fps: 2,
+                fps: 8,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
@@ -136,10 +136,10 @@ export default class Player {
         );
     }
 
-    draw() {
+    draw(deltaTime) {
         if (this.shouldRemove()) return;
 
-        this.currentAnimation.deltaTime = DELTA_TIME;
+        this.currentAnimation.deltaTime = deltaTime;
         animationHorizontalSprite(this.currentAnimation);
         this.currentAnimation.angle = this.movement.deathRotation;
         this.currentAnimation.facingLeft = this.movement.facingLeft;
@@ -151,13 +151,13 @@ export default class Player {
         //this.drawCollisionBox();
     }
 
-    update() {
+    update(deltaTime) {
         const bounds = this.getBounds();
-        this.movement.update(this.colliderId, bounds);
+        this.movement.update(this.colliderId, bounds, deltaTime);
 
         this.updateCollider();
         this.updateAnimation();
-        this.draw();
+        this.draw(deltaTime);
     }
 
     destroy() {

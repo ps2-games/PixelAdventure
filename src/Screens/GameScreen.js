@@ -80,7 +80,7 @@ export default class GameScreen extends BaseScreen {
         }
 
         if (this.player) {
-            this.player.update();
+            this.player.update(deltaTime);
             if (this.player.shouldRemove()) {
                 this.player.destroy();
                 // this.player = new Player({
@@ -93,7 +93,7 @@ export default class GameScreen extends BaseScreen {
 
         for (let i = this.fruits.length - 1; i >= 0; --i) {
             const fruit = this.fruits[i];
-            fruit.update();
+            fruit.update(deltaTime);
 
             if (fruit.shouldRemove()) {
                 fruit.destroy();

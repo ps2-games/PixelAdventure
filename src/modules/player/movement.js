@@ -1,4 +1,4 @@
-import { DELTA_TIME, PLAYER_MOVEMENT, PLAYERS_PORT } from "../../shared/constants.js";
+import { PLAYER_MOVEMENT, PLAYERS_PORT } from "../../shared/constants.js";
 import InputManager from "../../shared/input.js";
 import Collision from "../../shared/collision.js";
 
@@ -24,7 +24,7 @@ export default class Movement2D {
     isWallSliding = () => this.touchingWall && !this.onGround && this.velocity.y > 0;
     isInMaxYVelocity = () => this.velocity.y <= PLAYER_MOVEMENT.MAX_Y_VELOCITY;
     setCanMove = (canMove) => this.canMove = canMove;
-    applyGravity = () => this.velocity.y += (this.canMove ? PLAYER_MOVEMENT.DEFAULT_GRAVITY : PLAYER_MOVEMENT.DEFAULT_GRAVITY / 32) * DELTA_TIME
+    applyGravity = () => this.velocity.y += (this.canMove ? PLAYER_MOVEMENT.DEFAULT_GRAVITY : PLAYER_MOVEMENT.DEFAULT_GRAVITY / 32)
 
     moveHorizontally(direction) {
         this.facingLeft = direction.forLeft
@@ -159,7 +159,7 @@ checkWallCollision(colliderId, bounds) {
 
         const direction = this.facingLeft ? 1 : -1;
         this.velocity.x = direction * 2;
-        this.velocity.y = -12 * DELTA_TIME;
+        this.velocity.y = -12;
 
         this.deathRotation = 0;
         this._deathRotationSpeed = (Math.random() > 0.5 ? 1 : -1) * 0.05;
@@ -178,22 +178,22 @@ checkWallCollision(colliderId, bounds) {
         if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).justPressed(Pads.CIRCLE)) this.die();
     }
 
-    updatePosition() {
+    updatePosition(deltaTime) {
         if (this.isInMaxYVelocity()) this.applyGravity();
 
-        this.position.x += this.velocity.x * DELTA_TIME;
-        this.position.y += this.velocity.y;
+        this.position.x += this.velocity.x * deltaTime;
+        this.position.y += this.velocity.y * deltaTime;
     }
 
-    update(colliderId, bounds) {
+    update(colliderId, bounds, deltaTime) {
         if (this.canMove) this.handleInput();
-        else this.deathRotation += this._deathRotationSpeed * DELTA_TIME;
+        else this.deathRotation += this._deathRotationSpeed * deltaTime;
 
         if (this.isWallSliding()) {
             this.velocity.y = Math.min(this.velocity.y, 0.5);
         }
 
-        this.updatePosition();
+        this.updatePosition(deltaTime);
 
         if (this.canMove && colliderId && bounds) {
             this.checkWallCollision(colliderId, bounds);
