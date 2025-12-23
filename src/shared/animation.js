@@ -1,4 +1,6 @@
-function parallaxToDown(image, speed) {
+import { DELTA_TIME } from "./constants.js";
+
+function parallaxToDown(image, speed, deltaTime) {
     if (!image._parallax) {
         image._parallax = {
             positions: [0, -Math.fround(image.height)],
@@ -7,7 +9,6 @@ function parallaxToDown(image, speed) {
     }
 
     const now = Date.now();
-    const deltaTime = (now - image._parallax.lastUpdate) / 1000;
     image._parallax.lastUpdate = now;
 
     for (let i = 0; i < 2; i++) {

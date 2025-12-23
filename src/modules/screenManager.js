@@ -10,6 +10,8 @@ export default class ScreenManager {
         this.isInitialized = false;
         this.isPaused = false;
         this.defaultScreen = null;
+
+        this._enterPromise = null;
     }
 
     registerScreen(screenId, ScreenClass, isDefault = false) {
@@ -81,57 +83,42 @@ export default class ScreenManager {
     }
 
     _completeScreenChange(screenId, callback) {
-        const oldScreen = this.currentScreen;
-        const newScreen = this.screens.get(screenId);
+        const oldScreen = this.screens.get(screenId);
+        if (oldScreen && typeof oldScreen.onExit === 'function') oldScreen.onExit();
 
-        if (oldScreen && typeof oldScreen.onExit === 'function') {
-            oldScreen.onExit();
-        }
-
-        this.currentScreen = newScreen;
+        this.currentScreen = this.screens.get(screenId);
         this.nextScreen = null;
 
-        if (this.currentScreen && typeof this.currentScreen.onEnter === 'function') {
-            this.currentScreen.onEnter();
-        }
+        this._enterPromise = Promise.resolve(this.currentScreen.onEnter());
 
-        if (callback && typeof callback === 'function') {
-            callback(screenId);
-        }
+        this._enterPromise.then(() => {
+            this._enterPromise = null;
+            if (callback) callback(screenId);
+        });
     }
 
-    getCurrentScreen() {
-        return this.currentScreen;
-    }
-
-    getCurrentScreenId() {
-        for (const [id, screen] of this.screens.entries()) {
-            if (screen === this.currentScreen) {
-                return id;
-            }
-        }
-        return null;
-    }
-
-    update() {
-        if (this.isPaused) return;
+    update(deltaTime) {
+        if (this.isPaused || this._enterPromise) return;
 
         this.transition.update();
 
         if (!this.transition.isInTransition() && this.currentScreen) {
             if (typeof this.currentScreen.update === 'function') {
-                this.currentScreen.update();
+                this.currentScreen.update(deltaTime);
             }
         }
     }
 
-    render() {
-        if (this.isPaused) return;
+    render(deltaTime) {
+        if (this._enterPromise) {
+            this.transition.render();
+            return;
+        }
 
         if (this.transition.isInTransition()) {
             this.transition.render();
         } else if (this.currentScreen) {
-            this.currentScreen.render();
+            this.currentScreen.render(deltaTime);
         }
     }
 
@@ -158,18 +145,6 @@ export default class ScreenManager {
     setTransitionSpeed(speed) {
         this.transition.setTransitionSpeed(speed);
         return this;
-    }
-
-    getRegisteredScreens() {
-        return Array.from(this.screens.keys());
-    }
-
-    hasScreen(screenId) {
-        return this.screens.has(screenId);
-    }
-
-    forceStopTransition() {
-        this.transition.cancelTransition();
     }
 
     cleanup() {

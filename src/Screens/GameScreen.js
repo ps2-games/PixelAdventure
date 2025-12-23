@@ -14,7 +14,7 @@ export default class GameScreen extends BaseScreen {
     }
 
     async onEnter() {
-        const mapData = this.readLevelData();
+        const mapData = await this.readLevelData();
 
         if (mapData.tiles) {
             this.tileRender = new TilemapRenderer(mapData.tiles);
@@ -45,7 +45,7 @@ export default class GameScreen extends BaseScreen {
         this.fruits = [];
     }
 
-    readLevelData() {
+    async readLevelData() {
         const file = std.open("data.json", "r");
         const jsonString = file.readAsString();
 
@@ -66,8 +66,10 @@ export default class GameScreen extends BaseScreen {
         }
     }
 
-    render() {
-        super.renderBackground();
+    render(deltaTime) {
+        if(!deltaTime) return;
+        
+        this.renderBackground(deltaTime);
 
         if (Input.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.R1)) {
             Collision.toggleDebug();

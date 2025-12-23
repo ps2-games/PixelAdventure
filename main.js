@@ -18,9 +18,14 @@ Screen.setFrameCounter(true);
 Screen.setVSync(false);
 Screen.setParam(Screen.DEPTH_TEST_ENABLE, false);
 
-Screen.display(() => {
-    InputManager.update();
+let lastFrameTime = Date.now();
 
-    screenManager.update();
-    screenManager.render();
-})
+Screen.display(() => {
+    const now = Date.now();
+    const deltaTime = (now - lastFrameTime) / 1000;
+    lastFrameTime = now;
+
+    InputManager.update();
+    screenManager.update(deltaTime);
+    screenManager.render(deltaTime);
+});

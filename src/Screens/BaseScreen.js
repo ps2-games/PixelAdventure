@@ -18,15 +18,14 @@ export default class BaseScreen {
         this.screenManager = null;
     }
 
-
     _randomBackground(min = 0, max = BACKGROUNDS.length) {
         min = Math.ceil(min);
         max = Math.floor(max);
         return BACKGROUNDS[Math.floor(Math.random() * (max - min) + min)];
     }
 
-    renderBackground() {
-        parallaxToDown(this.background, 24)
+    renderBackground(deltaTime) {
+        parallaxToDown(this.background, 24, deltaTime)
     }
 
     setScreenManager(manager) {

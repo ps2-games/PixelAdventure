@@ -1,7 +1,7 @@
 import Assets from "../shared/assets.js";
 import { ASSETS_PATH, PLAYERS_PORT, SCREEN_HEIGHT, SCREEN_WIDTH, SCREENS } from "../shared/constants.js";
 import InputManager from "../shared/input.js";
-import BaseScreen from "./baseScreen.js";
+import BaseScreen from "./BaseScreen.js";
 
 export default class MenuScreen extends BaseScreen {
     constructor() {
@@ -17,8 +17,8 @@ export default class MenuScreen extends BaseScreen {
 
     }
 
-    render() {
-        this.renderBackground();
+    render(deltaTime) {
+        this.renderBackground(deltaTime);
 
         this.playButton.draw(SCREEN_WIDTH / 2 - this.playButton.width / 2, SCREEN_HEIGHT / 1.5);
         this.logo.draw(SCREEN_WIDTH / 2 - this.logo.width / 2, 80);
