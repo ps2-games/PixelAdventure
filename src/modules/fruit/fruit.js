@@ -19,6 +19,12 @@ export default class Fruit {
         this.animations = this._initAnimations();
         this.currentAnimation = this.animations[this.state];
 
+        this.animState = {
+            currentFrame: 0,
+            frameTimer: 0,
+            lastUpdate: Date.now()
+        };
+
         this._initCollider();
     }
 
@@ -26,7 +32,7 @@ export default class Fruit {
         return {
             [FRUIT_ANIMATION.IDLE]: Assets.image(`${ASSETS_PATH.Fruits}/${this.fruitType}.png`, {
                 totalFrames: 17,
-                fps: 2,
+                fps: 8,
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
@@ -65,6 +71,7 @@ export default class Fruit {
         if (this.isCollected) return;
 
         Audio.playSfx(PICKUP_FRUI_SFX);
+
         this.currentAnimation = Object.assign(new Image(`${ASSETS_PATH.VFX}/collected.png`), {
             totalFrames: 6,
             fps: 8,
@@ -73,9 +80,10 @@ export default class Fruit {
             loop: false,
             onAnimationEnd: () => this._effectDone = true
         });
-        this.currentAnimation.currentFrame = 0;
-        this.currentAnimation.frameTimer = 0;
-        this.currentAnimation.lastUpdate = Date.now();
+
+        this.animState.currentFrame = 0;
+        this.animState.frameTimer = 0;
+        this.animState.lastUpdate = Date.now();
 
         if (this.colliderId !== null) {
             Collision.unregister(this.colliderId);
@@ -85,10 +93,20 @@ export default class Fruit {
     }
 
     update() {
-        this.currentAnimation.deltaTime = DELTA_TIME;
-        animationHorizontalSprite(this.currentAnimation);
+        const img = this.currentAnimation;
 
-        this.currentAnimation.draw(this.position.x, this.position.y);
+        img.currentFrame = this.animState.currentFrame;
+        img.frameTimer = this.animState.frameTimer;
+        img.lastUpdate = this.animState.lastUpdate;
+        img.deltaTime = DELTA_TIME;
+
+        animationHorizontalSprite(img);
+
+        this.animState.currentFrame = img.currentFrame;
+        this.animState.frameTimer = img.frameTimer;
+        this.animState.lastUpdate = img.lastUpdate;
+
+        img.draw(this.position.x, this.position.y);
     }
 
     destroy() {
