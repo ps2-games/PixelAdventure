@@ -16,7 +16,7 @@ export default class GameScreen extends BaseScreen {
     async onEnter() {
         const mapData = this.readLevelData();
 
-        if(mapData.tiles){
+        if (mapData.tiles) {
             this.tileRender = new TilemapRenderer(mapData.tiles);
         }
 
@@ -89,9 +89,10 @@ export default class GameScreen extends BaseScreen {
             }
         }
 
-        for (let i = this.fruits.length - 1; i >= 0; i--) {
+        for (let i = this.fruits.length - 1; i >= 0; --i) {
             const fruit = this.fruits[i];
             fruit.update();
+
             if (fruit.shouldRemove()) {
                 fruit.destroy();
                 this.fruits.splice(i, 1);

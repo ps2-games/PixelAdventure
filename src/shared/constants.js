@@ -1,5 +1,14 @@
 import Assets from "./assets.js";
 
+//General Config
+const SCREENS = {
+    MENU: 'MENU',
+    GAME: 'GAME'
+}
+const TARGET_FPS = 30;
+const DELTA_TIME = Math.fround(1.0 / TARGET_FPS);
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
+
 // Assets
 const ASSETS_PATH = {
     Backgrounds: './assets/images/background',
@@ -76,15 +85,6 @@ const SAW_TRAP_ANIMATIONS = {
 const TILE_SIZE = 16;
 const TILES_PER_ROW = 22;
 const TILES_PER_COLUMN = 11;
-
-//General Config
-const SCREENS = {
-    MENU: 'MENU',
-    GAME: 'GAME'
-}
-const TARGET_FPS = 30;
-const DELTA_TIME = Math.fround(1.0 / TARGET_FPS);
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Screen.getMode();
 
 export {
     ASSETS_PATH,

@@ -30,13 +30,6 @@ export default class Fruit {
                 frameWidth: 32,
                 frameHeight: 32,
                 loop: true,
-            }),
-            [FRUIT_ANIMATION.COLLECTED]: Assets.image(`${ASSETS_PATH.VFX}/collected.png`, {
-                totalFrames: 6,
-                fps: 8,
-                frameWidth: 32,
-                frameHeight: 32,
-                loop: false,
             })
         }
     }
@@ -72,15 +65,22 @@ export default class Fruit {
         if (this.isCollected) return;
 
         Audio.playSfx(PICKUP_FRUI_SFX);
-
-        this.state = FRUIT_ANIMATION.COLLECTED;
-        this.currentAnimation = this.animations[this.state]
+        this.currentAnimation = Object.assign(new Image(`${ASSETS_PATH.VFX}/collected.png`), {
+            totalFrames: 6,
+            fps: 8,
+            frameWidth: 32,
+            frameHeight: 32,
+            loop: false,
+            onAnimationEnd: () => this._effectDone = true
+        });
+        this.currentAnimation.currentFrame = 0;
+        this.currentAnimation.frameTimer = 0;
+        this.currentAnimation.lastUpdate = Date.now();
 
         if (this.colliderId !== null) {
             Collision.unregister(this.colliderId);
             this.colliderId = null;
         }
-
         this.isCollected = true;
     }
 
@@ -103,8 +103,6 @@ export default class Fruit {
     }
 
     shouldRemove() {
-        if (this.state === FRUIT_ANIMATION.COLLECTED) return this.currentAnimation.currentFrame >= this.currentAnimation.totalFrames - 1;
-
-        return false;
+        return this.isCollected && this._effectDone
     }
 }
