@@ -1,4 +1,4 @@
-import InputManager from "./src/shared/input.js";
+import Gamepad from "./src/shared/gamepad.js";
 import MenuScreen from "./src/screens/MenuScreen.js";
 import ScreenManager from "./src/modules/screenManager.js";
 import { SCREENS } from "./src/shared/constants.js";
@@ -25,7 +25,7 @@ Screen.display(() => {
     const deltaTime = (now - lastFrameTime) / 1000;
     lastFrameTime = now;
 
-    InputManager.update();
+    Gamepad.update();
     screenManager.update(deltaTime);
     screenManager.render(deltaTime);
 });

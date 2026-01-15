@@ -1,11 +1,11 @@
-class Input {
+class Gamepad {
     static #instance;
     static #zero = Object.freeze({ x: 0, y: 0 });
     static #deadIface = Object.freeze({
         pressed: () => false,
         justPressed: () => false,
-        leftStick: () => Input.#zero,
-        rightStick: () => Input.#zero,
+        leftStick: () => Gamepad.#zero,
+        rightStick: () => Gamepad.#zero,
         pressure: () => 0,
         rumble: () => { },
         isActive: () => false,
@@ -14,8 +14,8 @@ class Input {
     });
 
     constructor() {
-        if (Input.#instance) return Input.#instance;
-        Input.#instance = this;
+        if (Gamepad.#instance) return Gamepad.#instance;
+        Gamepad.#instance = this;
         this.MAX_PLAYERS = 2;
         this.players = new Map();
         this.#init();
@@ -62,16 +62,16 @@ class Input {
     }
 
     player(p) {
-        if (p < 0 || p >= this.MAX_PLAYERS) return Input.#deadIface;
+        if (p < 0 || p >= this.MAX_PLAYERS) return Gamepad.#deadIface;
         return this.#live(this.players.get(p), p);
     }
 
     #live(player, p) {
-        if (!player) return Input.#deadIface;
+        if (!player) return Gamepad.#deadIface;
 
         const stick = (x, y) => this.#run(
             () => ({ x: x / 128.0, y: y / 128.0 }),
-            Input.#zero
+            Gamepad.#zero
         );
 
         return {
@@ -107,4 +107,4 @@ class Input {
         return [...this.players.entries()].flatMap(([k, v]) => v ? [k] : []);
     }
 }
-export default new Input();
+export default new Gamepad();

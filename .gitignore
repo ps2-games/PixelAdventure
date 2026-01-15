@@ -12,3 +12,7 @@
 *.log
 *.tmp
 *.temp
+
+athena_doc.md
+GEMINI.md
+design-log/

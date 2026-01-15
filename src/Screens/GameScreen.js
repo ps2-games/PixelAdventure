@@ -2,7 +2,7 @@ import Fruit from "../modules/fruit/fruit.js";
 import Player from "../modules/player/player.js";
 import TilemapRenderer from "../modules/tilemap/renderer.js";
 import Collision from "../shared/collision.js";
-import Input from "../shared/input.js";
+import Gamepad from "../shared/gamepad.js";
 import { FRUITS, PLAYERS_PORT } from "../shared/constants.js";
 import BaseScreen from "./BaseScreen.js";
 
@@ -71,7 +71,7 @@ export default class GameScreen extends BaseScreen {
         
         this.renderBackground(deltaTime);
 
-        if (Input.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.R1)) {
+        if (Gamepad.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.R1)) {
             Collision.toggleDebug();
         }
 

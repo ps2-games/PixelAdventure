@@ -1,5 +1,5 @@
 import { PLAYER_MOVEMENT, PLAYERS_PORT } from "../../shared/constants.js";
-import InputManager from "../../shared/input.js";
+import Gamepad from "../../shared/gamepad.js";
 import Collision from "../../shared/collision.js";
 
 export default class Movement2D {
@@ -166,16 +166,16 @@ checkWallCollision(colliderId, bounds) {
     }
 
     handleInput() {
-        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.RIGHT)) this.moveHorizontally({ forLeft: false });
-        else if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.LEFT)) this.moveHorizontally({ forLeft: true });
+        if (Gamepad.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.RIGHT)) this.moveHorizontally({ forLeft: false });
+        else if (Gamepad.player(PLAYERS_PORT.PLAYER_ONE).pressed(Pads.LEFT)) this.moveHorizontally({ forLeft: true });
         else this.velocity.x = 0;
 
-        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).justPressed(Pads.CROSS)) {
+        if (Gamepad.player(PLAYERS_PORT.PLAYER_ONE).justPressed(Pads.CROSS)) {
             if (this.touchingWall && !this.onGround) this.wallJump();
             else this.jump();
         }
 
-        if (InputManager.player(PLAYERS_PORT.PLAYER_ONE).justPressed(Pads.CIRCLE)) this.die();
+        if (Gamepad.player(PLAYERS_PORT.PLAYER_ONE).justPressed(Pads.CIRCLE)) this.die();
     }
 
     updatePosition(deltaTime) {
